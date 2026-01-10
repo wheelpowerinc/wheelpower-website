@@ -1,0 +1,485 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+
+// Size filter options
+const sizes = ['All', '14"', '15"', '16"', '17"', '18"'];
+
+// Sample mags data - Later this will come from your admin panel
+const mags = [
+  {
+    id: 1,
+    name: 'Rota Grid',
+    brand: 'Rota',
+    size: '15"',
+    boltPattern: '4x100',
+    width: '7J',
+    offset: '+38',
+    color: 'Flat Black',
+    price: 6500,
+    originalPrice: null,
+    status: 'available',
+    quantity: 8,
+    description: 'Classic mesh design that fits most compact cars. Lightweight and durable construction.',
+    image: null,
+  },
+  {
+    id: 2,
+    name: 'Rota Slipstream',
+    brand: 'Rota',
+    size: '16"',
+    boltPattern: '4x100 / 4x114',
+    width: '7J',
+    offset: '+40',
+    color: 'White',
+    price: 7200,
+    originalPrice: 8000,
+    status: 'available',
+    quantity: 4,
+    description: '6-spoke classic design. Perfect for JDM-style builds. Available in multiple colors.',
+    image: null,
+  },
+  {
+    id: 3,
+    name: 'Rays TE37',
+    brand: 'Rays',
+    size: '17"',
+    boltPattern: '5x114',
+    width: '8J',
+    offset: '+35',
+    color: 'Bronze',
+    price: 28000,
+    originalPrice: null,
+    status: 'limited',
+    quantity: 2,
+    description: 'Legendary Japanese forged wheel. Ultimate in lightweight performance.',
+    image: null,
+  },
+  {
+    id: 4,
+    name: 'Work Emotion CR',
+    brand: 'Work',
+    size: '17"',
+    boltPattern: '5x114',
+    width: '8.5J',
+    offset: '+38',
+    color: 'Matte Black',
+    price: 25000,
+    originalPrice: null,
+    status: 'available',
+    quantity: 4,
+    description: 'Split 5-spoke design with aggressive concave profile. Premium Japanese craftsmanship.',
+    image: null,
+  },
+  {
+    id: 5,
+    name: 'XXR 527',
+    brand: 'XXR',
+    size: '16"',
+    boltPattern: '4x100 / 4x114',
+    width: '8J',
+    offset: '+25',
+    color: 'Chromium Black',
+    price: 5800,
+    originalPrice: 6500,
+    status: 'available',
+    quantity: 12,
+    description: 'Aggressive concave design at an affordable price. Great for stance builds.',
+    image: null,
+  },
+  {
+    id: 6,
+    name: 'XXR 530',
+    brand: 'XXR',
+    size: '15"',
+    boltPattern: '4x100',
+    width: '8J',
+    offset: '+20',
+    color: 'Gold',
+    price: 5200,
+    originalPrice: null,
+    status: 'available',
+    quantity: 6,
+    description: 'Deep dish design for that classic lowered look. Fits most Hondas and Toyotas.',
+    image: null,
+  },
+  {
+    id: 7,
+    name: 'BBS RS',
+    brand: 'BBS',
+    size: '17"',
+    boltPattern: '5x112 / 5x120',
+    width: '8J',
+    offset: '+35',
+    color: 'Silver Polished',
+    price: 35000,
+    originalPrice: null,
+    status: 'limited',
+    quantity: 1,
+    description: 'Timeless 3-piece classic. The original luxury sport wheel since 1970.',
+    image: null,
+  },
+  {
+    id: 8,
+    name: 'Enkei RPF1',
+    brand: 'Enkei',
+    size: '16"',
+    boltPattern: '4x100',
+    width: '7J',
+    offset: '+43',
+    color: 'Silver',
+    price: 12000,
+    originalPrice: null,
+    status: 'out_of_stock',
+    quantity: 0,
+    description: 'Motorsport-proven lightweight wheel. Used in professional racing worldwide.',
+    image: null,
+  },
+  {
+    id: 9,
+    name: 'Watanabe RS',
+    brand: 'Watanabe',
+    size: '14"',
+    boltPattern: '4x114',
+    width: '6J',
+    offset: '+15',
+    color: 'White',
+    price: 18000,
+    originalPrice: null,
+    status: 'available',
+    quantity: 4,
+    description: 'Iconic 8-spoke Japanese classic. Perfect for vintage car restorations.',
+    image: null,
+  },
+  {
+    id: 10,
+    name: 'Lenso RT7',
+    brand: 'Lenso',
+    size: '15"',
+    boltPattern: '4x100',
+    width: '8J',
+    offset: '+25',
+    color: 'Hyper Black',
+    price: 4800,
+    originalPrice: null,
+    status: 'available',
+    quantity: 10,
+    description: 'Budget-friendly option with great looks. Popular choice for daily drivers.',
+    image: null,
+  },
+  {
+    id: 11,
+    name: 'Volk Racing CE28',
+    brand: 'Volk Racing',
+    size: '18"',
+    boltPattern: '5x114',
+    width: '9J',
+    offset: '+45',
+    color: 'Mag Blue',
+    price: 45000,
+    originalPrice: null,
+    status: 'limited',
+    quantity: 2,
+    description: 'Top-tier Japanese forged wheel. Track-tested performance with stunning looks.',
+    image: null,
+  },
+  {
+    id: 12,
+    name: 'Advanti Storm S1',
+    brand: 'Advanti',
+    size: '18"',
+    boltPattern: '5x114',
+    width: '8J',
+    offset: '+40',
+    color: 'Matte Grey',
+    price: 8500,
+    originalPrice: 9500,
+    status: 'available',
+    quantity: 8,
+    description: 'Modern multi-spoke design. Great balance of style and value for SUVs.',
+    image: null,
+  },
+];
+
+// Helper function for status badge
+function getStatusBadge(status: string, quantity: number) {
+  if (status === 'out_of_stock' || quantity === 0) {
+    return { text: 'Out of Stock', class: 'bg-red-500/20 text-red-400 border-red-500/30' };
+  }
+  if (status === 'limited' || quantity <= 3) {
+    return { text: `Only ${quantity} left`, class: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' };
+  }
+  return { text: 'In Stock', class: 'bg-green-500/20 text-green-400 border-green-500/30' };
+}
+
+// Format price
+function formatPrice(price: number) {
+  return '₱' + price.toLocaleString();
+}
+---
+
+<MainLayout 
+  title="Mags / Wheels" 
+  description="Browse quality mag wheels and rims at WheelPower Auto Shop. Wide selection of sizes and styles for all vehicles. Baras, Rizal."
+>
+
+  <!-- Page Header -->
+  <section class="bg-gradient-to-b from-dark-900 to-dark-950 py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <p class="section-subtitle">Our Products</p>
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Mags / Wheels</h1>
+      <p class="text-dark-300 text-lg max-w-2xl mx-auto">
+        Upgrade your ride with quality mag wheels. From budget-friendly to premium Japanese brands.
+      </p>
+    </div>
+  </section>
+
+  <!-- Size Filter -->
+  <section class="py-8 border-b border-dark-800 sticky top-16 md:top-20 bg-dark-950/95 backdrop-blur-md z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap gap-2 justify-center">
+        {sizes.map((size) => (
+          <button 
+            class="size-filter px-4 py-2 rounded-full text-sm font-medium border transition-all data-[active=true]:bg-primary-500 data-[active=true]:border-primary-500 data-[active=true]:text-white border-dark-600 text-dark-300 hover:border-primary-500/50 hover:text-white"
+            data-size={size.toLowerCase().replace('"', '')}
+            data-active={size === 'All' ? 'true' : 'false'}
+          >
+            {size}
+          </button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Mags Grid -->
+  <section class="py-12 md:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Results count -->
+      <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <p class="text-dark-400">
+          Showing <span id="mag-count" class="text-white font-medium">{mags.length}</span> wheels
+        </p>
+        <p class="text-dark-500 text-sm">
+          💡 Prices are per piece. Sold in sets of 4.
+        </p>
+      </div>
+      
+      <!-- Mags Grid -->
+      <div id="mags-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {mags.map((mag) => {
+          const statusBadge = getStatusBadge(mag.status, mag.quantity);
+          const isOutOfStock = mag.status === 'out_of_stock' || mag.quantity === 0;
+          
+          return (
+            <div 
+              class={`mag-card card overflow-hidden group ${isOutOfStock ? 'opacity-60' : ''}`}
+              data-size={mag.size.toLowerCase().replace('"', '')}
+            >
+              <!-- Image -->
+              <div class="aspect-square bg-gradient-to-br from-dark-800 to-dark-900 relative overflow-hidden">
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <div class="text-center">
+                    <div class="text-6xl mb-2">🎡</div>
+                    <p class="text-dark-500 text-xs">{mag.brand}</p>
+                  </div>
+                </div>
+                
+                <!-- Status Badge -->
+                <div class="absolute top-3 left-3">
+                  <span class={`px-2 py-1 rounded-full text-xs font-medium border ${statusBadge.class}`}>
+                    {statusBadge.text}
+                  </span>
+                </div>
+                
+                <!-- Sale Badge -->
+                {mag.originalPrice && (
+                  <div class="absolute top-3 right-3">
+                    <span class="px-2 py-1 bg-primary-500 text-white rounded-full text-xs font-bold">
+                      SALE
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              <!-- Info -->
+              <div class="p-4">
+                <!-- Brand -->
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="text-primary-400 text-sm font-medium">{mag.brand}</span>
+                  <span class="text-dark-600">•</span>
+                  <span class="text-dark-400 text-sm">{mag.color}</span>
+                </div>
+                
+                <!-- Name -->
+                <h3 class="font-bold text-white group-hover:text-primary-400 transition-colors mb-2">
+                  {mag.name}
+                </h3>
+                
+                <!-- Specs -->
+                <div class="grid grid-cols-2 gap-x-4 gap-y-1 mb-3 text-sm">
+                  <div>
+                    <span class="text-dark-500">Size:</span>
+                    <span class="text-dark-300 ml-1">{mag.size}</span>
+                  </div>
+                  <div>
+                    <span class="text-dark-500">Width:</span>
+                    <span class="text-dark-300 ml-1">{mag.width}</span>
+                  </div>
+                  <div>
+                    <span class="text-dark-500">PCD:</span>
+                    <span class="text-dark-300 ml-1">{mag.boltPattern}</span>
+                  </div>
+                  <div>
+                    <span class="text-dark-500">Offset:</span>
+                    <span class="text-dark-300 ml-1">{mag.offset}</span>
+                  </div>
+                </div>
+                
+                <!-- Price -->
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="text-xl font-bold text-white">{formatPrice(mag.price)}</span>
+                  {mag.originalPrice && (
+                    <span class="text-dark-500 line-through text-sm">{formatPrice(mag.originalPrice)}</span>
+                  )}
+                  <span class="text-dark-500 text-xs">/pc</span>
+                </div>
+                
+                <!-- Action Button -->
+                {isOutOfStock ? (
+                  <button disabled class="w-full py-2.5 rounded-lg bg-dark-800 text-dark-500 font-medium cursor-not-allowed">
+                    Out of Stock
+                  </button>
+                ) : (
+                  <a 
+                    href={`/book?product=mags&item=${mag.id}`}
+                    class="block w-full py-2.5 rounded-lg bg-primary-500 hover:bg-primary-600 text-white font-medium text-center transition-colors"
+                  >
+                    Inquire / Buy
+                  </a>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      
+      <!-- Empty State (hidden by default) -->
+      <div id="empty-state" class="hidden text-center py-16">
+        <div class="text-6xl mb-4">🔍</div>
+        <h3 class="text-xl font-bold text-white mb-2">No wheels found</h3>
+        <p class="text-dark-400 mb-4">Try selecting a different size filter.</p>
+        <button id="reset-filter" class="btn-secondary">
+          Show All Wheels
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Info Section -->
+  <section class="py-16 bg-dark-900/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="text-4xl mb-4">📏</div>
+          <h3 class="font-bold text-white mb-2">Fitment Check</h3>
+          <p class="text-dark-400 text-sm">Not sure if it fits? Tell us your car model and we'll verify compatibility.</p>
+        </div>
+        <div class="text-center">
+          <div class="text-4xl mb-4">🔧</div>
+          <h3 class="font-bold text-white mb-2">Installation Included</h3>
+          <p class="text-dark-400 text-sm">All wheel purchases include free mounting and balancing.</p>
+        </div>
+        <div class="text-center">
+          <div class="text-4xl mb-4">🔘</div>
+          <h3 class="font-bold text-white mb-2">Tire Packages</h3>
+          <p class="text-dark-400 text-sm">Ask about our wheel + tire combo deals for extra savings!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">
+        Looking for a Specific Design?
+      </h2>
+      <p class="text-dark-300 mb-8">
+        We can source wheels from various suppliers. Send us a photo or model name 
+        and we'll get you a quote.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/contact" class="btn-secondary">
+          Send Inquiry
+        </a>
+        <a href="tel:+639XXXXXXXXX" class="btn-primary">
+          📞 Call Us
+        </a>
+      </div>
+    </div>
+  </section>
+
+</MainLayout>
+
+<!-- Filter Script -->
+<script>
+  const filterButtons = document.querySelectorAll('.size-filter');
+  const magCards = document.querySelectorAll('.mag-card');
+  const magCount = document.getElementById('mag-count');
+  const emptyState = document.getElementById('empty-state');
+  const magsGrid = document.getElementById('mags-grid');
+  const resetButton = document.getElementById('reset-filter');
+
+  function filterMags(size: string) {
+    let visibleCount = 0;
+    
+    magCards.forEach((card) => {
+      const cardSize = (card as HTMLElement).dataset.size;
+      const shouldShow = size === 'all' || cardSize === size;
+      
+      if (shouldShow) {
+        (card as HTMLElement).style.display = 'block';
+        visibleCount++;
+      } else {
+        (card as HTMLElement).style.display = 'none';
+      }
+    });
+    
+    // Update count
+    if (magCount) {
+      magCount.textContent = visibleCount.toString();
+    }
+    
+    // Show/hide empty state
+    if (emptyState && magsGrid) {
+      if (visibleCount === 0) {
+        emptyState.classList.remove('hidden');
+        magsGrid.classList.add('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+        magsGrid.classList.remove('hidden');
+      }
+    }
+    
+    // Update active button
+    filterButtons.forEach((btn) => {
+      const btnSize = (btn as HTMLElement).dataset.size;
+      (btn as HTMLElement).dataset.active = (btnSize === size).toString();
+    });
+  }
+
+  // Add click handlers
+  filterButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const size = (btn as HTMLElement).dataset.size || 'all';
+      filterMags(size);
+    });
+  });
+
+  // Reset button
+  if (resetButton) {
+    resetButton.addEventListener('click', () => {
+      filterMags('all');
+    });
+  }
+</script>

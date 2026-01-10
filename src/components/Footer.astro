@@ -1,0 +1,143 @@
+---
+// Footer Component - Appears at the bottom of every page
+const currentYear = new Date().getFullYear();
+
+const quickLinks = [
+  { name: 'Services', href: '/services' },
+  { name: 'Tires', href: '/tires' },
+  { name: 'Mags', href: '/mags' },
+  { name: 'Gallery', href: '/gallery' },
+  { name: 'Book Appointment', href: '/book' },
+];
+
+const services = [
+  'Tire Installation',
+  'Wheel Alignment',
+  'Vulcanizing',
+  'Oil Change',
+  'Preventive Maintenance',
+];
+
+const tireBrands = [
+  'Sailun', 'Radar', 'Comforser', 'Thunderer', 'Apollo', 'Toyo', 'Dunlop'
+];
+---
+
+<footer class="bg-dark-950 border-t border-dark-800">
+  <!-- Main Footer -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+      
+      <!-- Company Info -->
+      <div class="lg:col-span-1">
+        <a href="/" class="flex items-center gap-2 mb-4">
+          <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center font-bold text-lg">
+            W
+          </div>
+          <div>
+            <div class="font-bold text-lg text-white">WheelPower</div>
+            <div class="text-xs text-primary-400 -mt-1">Tires & Auto Care</div>
+          </div>
+        </a>
+        <p class="text-dark-400 text-sm leading-relaxed mb-4">
+          Your trusted partner for quality tires and professional auto care services in Rizal. 
+          We keep your wheels rolling safely.
+        </p>
+        <div class="flex items-center gap-2 text-sm text-primary-400">
+          <span>⭐</span>
+          <span>gulong.ph Installation Partner</span>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div>
+        <h4 class="font-semibold text-white mb-4">Quick Links</h4>
+        <ul class="space-y-2">
+          {quickLinks.map((link) => (
+            <li>
+              <a 
+                href={link.href} 
+                class="text-dark-400 hover:text-primary-400 transition-colors text-sm"
+              >
+                {link.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Services -->
+      <div>
+        <h4 class="font-semibold text-white mb-4">Our Services</h4>
+        <ul class="space-y-2">
+          {services.map((service) => (
+            <li class="text-dark-400 text-sm">{service}</li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Contact Info -->
+      <div>
+        <h4 class="font-semibold text-white mb-4">Contact Us</h4>
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3 text-sm">
+            <span class="text-primary-400 mt-0.5">📍</span>
+            <span class="text-dark-400">
+              Marilaque Highway,<br />
+              Baras, Rizal, Philippines
+            </span>
+          </li>
+          <li>
+            <a href="tel:+639XXXXXXXXX" class="flex items-center gap-3 text-sm text-dark-400 hover:text-primary-400 transition-colors">
+              <span class="text-primary-400">📞</span>
+              <span>+63 9XX XXX XXXX</span>
+            </a>
+          </li>
+          <li>
+            <a href="mailto:info@wheelpowerautoshop.com" class="flex items-center gap-3 text-sm text-dark-400 hover:text-primary-400 transition-colors">
+              <span class="text-primary-400">✉️</span>
+              <span>info@wheelpowerautoshop.com</span>
+            </a>
+          </li>
+          <li class="flex items-start gap-3 text-sm">
+            <span class="text-primary-400 mt-0.5">🕐</span>
+            <span class="text-dark-400">
+              Open Daily<br />
+              <span class="text-primary-400 font-medium">8:00 AM - 5:00 PM</span>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Tire Brands -->
+    <div class="mt-12 pt-8 border-t border-dark-800">
+      <h4 class="font-semibold text-white text-center mb-4">Tire Brands We Carry</h4>
+      <div class="flex flex-wrap justify-center gap-3">
+        {tireBrands.map((brand) => (
+          <span class="px-4 py-2 bg-dark-800/50 rounded-lg text-sm text-dark-300 border border-dark-700/50">
+            {brand}
+          </span>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="border-t border-dark-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-dark-500">
+        <p>© {currentYear} WheelPower Tires and Auto Care Services. All rights reserved.</p>
+        <div class="flex items-center gap-4">
+          <a href="https://www.facebook.com/WheelPowerTiresAutocare" target="_blank" rel="noopener noreferrer" class="hover:text-primary-400 transition-colors">
+            Facebook
+          </a>
+          <span class="text-dark-700">|</span>
+          <a href="/contact" class="hover:text-primary-400 transition-colors">
+            Contact
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

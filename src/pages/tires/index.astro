@@ -1,0 +1,457 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+
+// Tire brands we carry
+const brands = ['All', 'Sailun', 'Radar', 'Comforser', 'Thunderer', 'Apollo', 'Toyo', 'Dunlop'];
+
+// Sample tire data - Later this will come from your admin panel
+const tires = [
+  {
+    id: 1,
+    name: 'Atrezzo Elite',
+    brand: 'Sailun',
+    size: '205/55R16',
+    type: 'Passenger',
+    price: 3500,
+    originalPrice: null,
+    status: 'available',
+    quantity: 12,
+    description: 'Premium touring tire with excellent wet and dry performance. Low noise and comfortable ride.',
+    features: ['Low Rolling Resistance', 'Long Tread Life', 'Quiet Ride'],
+    image: null,
+  },
+  {
+    id: 2,
+    name: 'Atrezzo ZSR',
+    brand: 'Sailun',
+    size: '225/45R17',
+    type: 'Performance',
+    price: 4200,
+    originalPrice: 4800,
+    status: 'available',
+    quantity: 8,
+    description: 'High-performance tire designed for sports sedans. Superior handling and grip.',
+    features: ['Sport Performance', 'Enhanced Grip', 'Responsive Handling'],
+    image: null,
+  },
+  {
+    id: 3,
+    name: 'Dimax R8+',
+    brand: 'Radar',
+    size: '265/65R17',
+    type: 'SUV',
+    price: 5800,
+    originalPrice: null,
+    status: 'available',
+    quantity: 6,
+    description: 'All-terrain SUV tire built for both on-road comfort and off-road capability.',
+    features: ['All-Terrain', 'Durable Construction', 'SUV Optimized'],
+    image: null,
+  },
+  {
+    id: 4,
+    name: 'RPX800',
+    brand: 'Radar',
+    size: '195/65R15',
+    type: 'Passenger',
+    price: 2800,
+    originalPrice: null,
+    status: 'limited',
+    quantity: 3,
+    description: 'Reliable everyday tire offering good value and dependable performance.',
+    features: ['Value Choice', 'Reliable Performance', 'Even Wear'],
+    image: null,
+  },
+  {
+    id: 5,
+    name: 'CF700',
+    brand: 'Comforser',
+    size: '185/65R15',
+    type: 'Passenger',
+    price: 2400,
+    originalPrice: null,
+    status: 'available',
+    quantity: 15,
+    description: 'Budget-friendly tire without compromising safety. Great for daily commuters.',
+    features: ['Budget Friendly', 'Safe Performance', 'Fuel Efficient'],
+    image: null,
+  },
+  {
+    id: 6,
+    name: 'CF2000',
+    brand: 'Comforser',
+    size: '265/70R16',
+    type: 'SUV/Light Truck',
+    price: 4500,
+    originalPrice: 5000,
+    status: 'available',
+    quantity: 10,
+    description: 'Rugged tire for SUVs and light trucks. Highway and light off-road capable.',
+    features: ['Highway Terrain', 'Light Off-Road', 'Heavy Duty'],
+    image: null,
+  },
+  {
+    id: 7,
+    name: 'Ranger R404 AT',
+    brand: 'Thunderer',
+    size: '245/70R16',
+    type: 'All-Terrain',
+    price: 5200,
+    originalPrice: null,
+    status: 'available',
+    quantity: 7,
+    description: 'Aggressive all-terrain tire for adventurers. Excellent mud and gravel traction.',
+    features: ['All-Terrain', 'Mud Traction', 'Adventure Ready'],
+    image: null,
+  },
+  {
+    id: 8,
+    name: 'Mach IV R302',
+    brand: 'Thunderer',
+    size: '215/45R17',
+    type: 'Performance',
+    price: 3800,
+    originalPrice: null,
+    status: 'out_of_stock',
+    quantity: 0,
+    description: 'Sport performance tire with aggressive looks and precise handling.',
+    features: ['Sport Design', 'Precise Handling', 'High Speed Rated'],
+    image: null,
+  },
+  {
+    id: 9,
+    name: 'Alnac 4G',
+    brand: 'Apollo',
+    size: '195/55R16',
+    type: 'Passenger',
+    price: 3200,
+    originalPrice: null,
+    status: 'available',
+    quantity: 9,
+    description: 'European-engineered tire with excellent wet grip and low noise levels.',
+    features: ['European Quality', 'Wet Grip', 'Low Noise'],
+    image: null,
+  },
+  {
+    id: 10,
+    name: 'Apterra HT2',
+    brand: 'Apollo',
+    size: '235/60R18',
+    type: 'SUV',
+    price: 5500,
+    originalPrice: 6000,
+    status: 'limited',
+    quantity: 2,
+    description: 'Premium highway terrain SUV tire for comfort and long trips.',
+    features: ['Highway Comfort', 'Premium Quality', 'Long Distance'],
+    image: null,
+  },
+  {
+    id: 11,
+    name: 'Proxes CF2',
+    brand: 'Toyo',
+    size: '205/60R16',
+    type: 'Passenger',
+    price: 4800,
+    originalPrice: null,
+    status: 'available',
+    quantity: 5,
+    description: 'Japanese quality tire with advanced comfort technology and durability.',
+    features: ['Japanese Quality', 'Advanced Comfort', 'Durable'],
+    image: null,
+  },
+  {
+    id: 12,
+    name: 'SP Sport LM705',
+    brand: 'Dunlop',
+    size: '215/55R17',
+    type: 'Touring',
+    price: 5200,
+    originalPrice: null,
+    status: 'available',
+    quantity: 6,
+    description: 'Premium touring tire from a legendary brand. Supreme comfort and handling.',
+    features: ['Premium Brand', 'Supreme Comfort', 'Excellent Handling'],
+    image: null,
+  },
+];
+
+// Helper function for status badge
+function getStatusBadge(status: string, quantity: number) {
+  if (status === 'out_of_stock' || quantity === 0) {
+    return { text: 'Out of Stock', class: 'bg-red-500/20 text-red-400 border-red-500/30' };
+  }
+  if (status === 'limited' || quantity <= 3) {
+    return { text: `Only ${quantity} left`, class: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' };
+  }
+  return { text: 'In Stock', class: 'bg-green-500/20 text-green-400 border-green-500/30' };
+}
+
+// Format price
+function formatPrice(price: number) {
+  return '₱' + price.toLocaleString();
+}
+---
+
+<MainLayout 
+  title="Tires" 
+  description="Browse quality tires from top brands - Sailun, Radar, Comforser, Thunderer, Apollo, Toyo, Dunlop. Available at WheelPower Auto Shop in Baras, Rizal."
+>
+
+  <!-- Page Header -->
+  <section class="bg-gradient-to-b from-dark-900 to-dark-950 py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <p class="section-subtitle">Our Products</p>
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Tires</h1>
+      <p class="text-dark-300 text-lg max-w-2xl mx-auto">
+        Quality tires from trusted brands. Find the perfect tires for your vehicle and budget.
+      </p>
+    </div>
+  </section>
+
+  <!-- Brand Filter -->
+  <section class="py-8 border-b border-dark-800 sticky top-16 md:top-20 bg-dark-950/95 backdrop-blur-md z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap gap-2 justify-center">
+        {brands.map((brand) => (
+          <button 
+            class="brand-filter px-4 py-2 rounded-full text-sm font-medium border transition-all data-[active=true]:bg-primary-500 data-[active=true]:border-primary-500 data-[active=true]:text-white border-dark-600 text-dark-300 hover:border-primary-500/50 hover:text-white"
+            data-brand={brand.toLowerCase()}
+            data-active={brand === 'All' ? 'true' : 'false'}
+          >
+            {brand}
+          </button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Tires Grid -->
+  <section class="py-12 md:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Results count -->
+      <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <p class="text-dark-400">
+          Showing <span id="tire-count" class="text-white font-medium">{tires.length}</span> tires
+        </p>
+        <p class="text-dark-500 text-sm">
+          💡 Prices are per tire. Installation available.
+        </p>
+      </div>
+      
+      <!-- Tires Grid -->
+      <div id="tires-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {tires.map((tire) => {
+          const statusBadge = getStatusBadge(tire.status, tire.quantity);
+          const isOutOfStock = tire.status === 'out_of_stock' || tire.quantity === 0;
+          
+          return (
+            <div 
+              class={`tire-card card overflow-hidden group ${isOutOfStock ? 'opacity-60' : ''}`}
+              data-brand={tire.brand.toLowerCase()}
+            >
+              <!-- Image -->
+              <div class="aspect-square bg-gradient-to-br from-dark-800 to-dark-900 relative overflow-hidden">
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <div class="text-center">
+                    <div class="text-6xl mb-2">🔘</div>
+                    <p class="text-dark-500 text-xs">{tire.brand}</p>
+                  </div>
+                </div>
+                
+                <!-- Status Badge -->
+                <div class="absolute top-3 left-3">
+                  <span class={`px-2 py-1 rounded-full text-xs font-medium border ${statusBadge.class}`}>
+                    {statusBadge.text}
+                  </span>
+                </div>
+                
+                <!-- Sale Badge -->
+                {tire.originalPrice && (
+                  <div class="absolute top-3 right-3">
+                    <span class="px-2 py-1 bg-primary-500 text-white rounded-full text-xs font-bold">
+                      SALE
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              <!-- Info -->
+              <div class="p-4">
+                <!-- Brand & Type -->
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="text-primary-400 text-sm font-medium">{tire.brand}</span>
+                  <span class="text-dark-600">•</span>
+                  <span class="text-dark-400 text-sm">{tire.type}</span>
+                </div>
+                
+                <!-- Name & Size -->
+                <h3 class="font-bold text-white group-hover:text-primary-400 transition-colors mb-1">
+                  {tire.name}
+                </h3>
+                <p class="text-dark-400 text-sm mb-3">Size: {tire.size}</p>
+                
+                <!-- Features -->
+                <div class="flex flex-wrap gap-1 mb-4">
+                  {tire.features.slice(0, 2).map((feature) => (
+                    <span class="px-2 py-0.5 bg-dark-800 rounded text-xs text-dark-300">
+                      {feature}
+                    </span>
+                  ))}
+                </div>
+                
+                <!-- Price -->
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="text-xl font-bold text-white">{formatPrice(tire.price)}</span>
+                  {tire.originalPrice && (
+                    <span class="text-dark-500 line-through text-sm">{formatPrice(tire.originalPrice)}</span>
+                  )}
+                </div>
+                
+                <!-- Action Button -->
+                {isOutOfStock ? (
+                  <button disabled class="w-full py-2.5 rounded-lg bg-dark-800 text-dark-500 font-medium cursor-not-allowed">
+                    Out of Stock
+                  </button>
+                ) : (
+                  <a 
+                    href={`/book?product=tire&item=${tire.id}`}
+                    class="block w-full py-2.5 rounded-lg bg-primary-500 hover:bg-primary-600 text-white font-medium text-center transition-colors"
+                  >
+                    Inquire / Buy
+                  </a>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      
+      <!-- Empty State (hidden by default) -->
+      <div id="empty-state" class="hidden text-center py-16">
+        <div class="text-6xl mb-4">🔍</div>
+        <h3 class="text-xl font-bold text-white mb-2">No tires found</h3>
+        <p class="text-dark-400 mb-4">Try selecting a different brand filter.</p>
+        <button id="reset-filter" class="btn-secondary">
+          Show All Tires
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Info Section -->
+  <section class="py-16 bg-dark-900/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="text-4xl mb-4">🚗</div>
+          <h3 class="font-bold text-white mb-2">Free Size Consultation</h3>
+          <p class="text-dark-400 text-sm">Not sure what size you need? We'll help you find the right fit for your vehicle.</p>
+        </div>
+        <div class="text-center">
+          <div class="text-4xl mb-4">🔧</div>
+          <h3 class="font-bold text-white mb-2">Installation Available</h3>
+          <p class="text-dark-400 text-sm">Purchase includes professional installation at our shop.</p>
+        </div>
+        <div class="text-center">
+          <div class="text-4xl mb-4">💰</div>
+          <h3 class="font-bold text-white mb-2">Best Price Guarantee</h3>
+          <p class="text-dark-400 text-sm">Competitive prices on all tire brands. Ask about our promos!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">
+        Can't Find What You're Looking For?
+      </h2>
+      <p class="text-dark-300 mb-8">
+        We may have more sizes and brands in stock. Contact us with your vehicle details 
+        and we'll find the perfect tires for you.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/contact" class="btn-secondary">
+          Send Inquiry
+        </a>
+        <a href="tel:+639XXXXXXXXX" class="btn-primary">
+          📞 Call Us
+        </a>
+      </div>
+    </div>
+  </section>
+
+</MainLayout>
+
+<!-- Filter Script -->
+<script>
+  const filterButtons = document.querySelectorAll('.brand-filter');
+  const tireCards = document.querySelectorAll('.tire-card');
+  const tireCount = document.getElementById('tire-count');
+  const emptyState = document.getElementById('empty-state');
+  const tiresGrid = document.getElementById('tires-grid');
+  const resetButton = document.getElementById('reset-filter');
+
+  function filterTires(brand: string) {
+    let visibleCount = 0;
+    
+    tireCards.forEach((card) => {
+      const cardBrand = (card as HTMLElement).dataset.brand;
+      const shouldShow = brand === 'all' || cardBrand === brand;
+      
+      if (shouldShow) {
+        (card as HTMLElement).style.display = 'block';
+        visibleCount++;
+      } else {
+        (card as HTMLElement).style.display = 'none';
+      }
+    });
+    
+    // Update count
+    if (tireCount) {
+      tireCount.textContent = visibleCount.toString();
+    }
+    
+    // Show/hide empty state
+    if (emptyState && tiresGrid) {
+      if (visibleCount === 0) {
+        emptyState.classList.remove('hidden');
+        tiresGrid.classList.add('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+        tiresGrid.classList.remove('hidden');
+      }
+    }
+    
+    // Update active button
+    filterButtons.forEach((btn) => {
+      const btnBrand = (btn as HTMLElement).dataset.brand;
+      (btn as HTMLElement).dataset.active = (btnBrand === brand).toString();
+    });
+  }
+
+  // Add click handlers
+  filterButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const brand = (btn as HTMLElement).dataset.brand || 'all';
+      filterTires(brand);
+    });
+  });
+
+  // Reset button
+  if (resetButton) {
+    resetButton.addEventListener('click', () => {
+      filterTires('all');
+    });
+  }
+
+  // Check URL for brand filter on page load
+  const urlParams = new URLSearchParams(window.location.search);
+  const brandParam = urlParams.get('brand');
+  if (brandParam) {
+    filterTires(brandParam.toLowerCase());
+  }
+</script>

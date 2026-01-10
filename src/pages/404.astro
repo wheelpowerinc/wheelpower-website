@@ -1,0 +1,45 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+---
+
+<MainLayout title="Page Not Found">
+  <section class="min-h-[70vh] flex items-center justify-center py-20">
+    <div class="max-w-xl mx-auto px-4 text-center">
+      <!-- 404 Icon -->
+      <div class="text-8xl mb-6">🔧</div>
+      
+      <!-- Error Code -->
+      <h1 class="text-6xl md:text-8xl font-bold text-primary-500 mb-4">404</h1>
+      
+      <!-- Message -->
+      <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">
+        Page Not Found
+      </h2>
+      <p class="text-dark-300 mb-8">
+        Oops! Looks like this page took a wrong turn. 
+        Don't worry, let's get you back on track.
+      </p>
+      
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/" class="btn-primary">
+          🏠 Go to Homepage
+        </a>
+        <a href="/contact" class="btn-secondary">
+          📞 Contact Us
+        </a>
+      </div>
+      
+      <!-- Quick Links -->
+      <div class="mt-12 pt-8 border-t border-dark-800">
+        <p class="text-dark-400 text-sm mb-4">Or check out these pages:</p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a href="/services" class="text-primary-400 hover:text-primary-300 transition-colors">Services</a>
+          <a href="/tires" class="text-primary-400 hover:text-primary-300 transition-colors">Tires</a>
+          <a href="/mags" class="text-primary-400 hover:text-primary-300 transition-colors">Mags</a>
+          <a href="/book" class="text-primary-400 hover:text-primary-300 transition-colors">Book Appointment</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</MainLayout>

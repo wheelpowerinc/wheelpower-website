@@ -1,0 +1,349 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+
+// Services available for booking
+const services = [
+  { id: 'tire-installation', name: 'Tire Installation', duration: '30-60 mins', price: 'From ₱300/tire' },
+  { id: 'wheel-alignment', name: 'Wheel Alignment', duration: '45-60 mins', price: 'From ₱800' },
+  { id: 'vulcanizing', name: 'Vulcanizing / Tire Repair', duration: '15-30 mins', price: 'From ₱150' },
+  { id: 'oil-change', name: 'Oil Change', duration: '20-30 mins', price: 'From ₱800' },
+  { id: 'preventive-maintenance', name: 'Preventive Maintenance', duration: '1-2 hours', price: 'From ₱1,500' },
+  { id: 'underchassis', name: 'Underchassis Repair', duration: 'Varies', price: 'Get Quote' },
+  { id: 'tire-purchase', name: 'Tire Purchase & Install', duration: '1 hour', price: 'Based on tire' },
+  { id: 'mags-purchase', name: 'Mags Purchase & Install', duration: '1-2 hours', price: 'Based on mags' },
+  { id: 'other', name: 'Other / General Inquiry', duration: 'Varies', price: 'Get Quote' },
+];
+
+// Available time slots
+const timeSlots = [
+  '8:00 AM', '8:30 AM', '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
+  '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM', '4:00 PM'
+];
+---
+
+<MainLayout 
+  title="Book Appointment" 
+  description="Schedule your service appointment at WheelPower Auto Shop. Easy online booking for tire installation, wheel alignment, and more."
+>
+
+  <!-- Page Header -->
+  <section class="bg-gradient-to-b from-dark-900 to-dark-950 py-16 md:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <p class="section-subtitle">Schedule a Visit</p>
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Book an Appointment</h1>
+      <p class="text-dark-300 text-lg max-w-2xl mx-auto">
+        Fill out the form below to request an appointment. We'll confirm your booking via SMS or call.
+      </p>
+    </div>
+  </section>
+
+  <!-- Booking Form Section -->
+  <section class="py-12 md:py-16">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Form Card -->
+      <div class="card p-6 md:p-8">
+        <form id="booking-form" class="space-y-8">
+          
+          <!-- Step 1: Select Service -->
+          <div class="space-y-4">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold text-sm">1</div>
+              <h2 class="text-xl font-bold text-white">Select Service</h2>
+            </div>
+            
+            <div class="grid sm:grid-cols-2 gap-3">
+              {services.map((service) => (
+                <label 
+                  class="service-option relative flex items-start gap-3 p-4 rounded-xl border-2 border-dark-700 hover:border-primary-500/50 cursor-pointer transition-all has-[:checked]:border-primary-500 has-[:checked]:bg-primary-500/10"
+                >
+                  <input 
+                    type="radio" 
+                    name="service" 
+                    value={service.id}
+                    required
+                    class="mt-1 w-4 h-4 text-primary-500 bg-dark-800 border-dark-600 focus:ring-primary-500 focus:ring-2"
+                  />
+                  <div class="flex-1">
+                    <div class="font-medium text-white">{service.name}</div>
+                    <div class="text-sm text-dark-400">{service.duration} • {service.price}</div>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <!-- Divider -->
+          <div class="border-t border-dark-700"></div>
+
+          <!-- Step 2: Choose Date & Time -->
+          <div class="space-y-4">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold text-sm">2</div>
+              <h2 class="text-xl font-bold text-white">Choose Date & Time</h2>
+            </div>
+            
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label for="date" class="block text-sm font-medium text-dark-300 mb-2">
+                  Preferred Date *
+                </label>
+                <input 
+                  type="date" 
+                  id="date" 
+                  name="date" 
+                  required
+                  min={new Date().toISOString().split('T')[0]}
+                  class="input-field"
+                />
+              </div>
+              
+              <div>
+                <label for="time" class="block text-sm font-medium text-dark-300 mb-2">
+                  Preferred Time *
+                </label>
+                <select id="time" name="time" required class="input-field">
+                  <option value="">Select a time</option>
+                  {timeSlots.map((slot) => (
+                    <option value={slot}>{slot}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            <p class="text-dark-500 text-sm">
+              ⏰ Shop hours: 8:00 AM - 5:00 PM daily. Last appointment at 4:00 PM.
+            </p>
+          </div>
+
+          <!-- Divider -->
+          <div class="border-t border-dark-700"></div>
+
+          <!-- Step 3: Your Information -->
+          <div class="space-y-4">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold text-sm">3</div>
+              <h2 class="text-xl font-bold text-white">Your Information</h2>
+            </div>
+            
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div class="sm:col-span-2">
+                <label for="name" class="block text-sm font-medium text-dark-300 mb-2">
+                  Full Name *
+                </label>
+                <input 
+                  type="text" 
+                  id="name" 
+                  name="name" 
+                  required
+                  placeholder="Juan Dela Cruz"
+                  class="input-field"
+                />
+              </div>
+              
+              <div>
+                <label for="phone" class="block text-sm font-medium text-dark-300 mb-2">
+                  Phone Number *
+                </label>
+                <input 
+                  type="tel" 
+                  id="phone" 
+                  name="phone" 
+                  required
+                  placeholder="0917 123 4567"
+                  class="input-field"
+                />
+              </div>
+              
+              <div>
+                <label for="email" class="block text-sm font-medium text-dark-300 mb-2">
+                  Email Address
+                </label>
+                <input 
+                  type="email" 
+                  id="email" 
+                  name="email" 
+                  placeholder="juan@email.com"
+                  class="input-field"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label for="vehicle" class="block text-sm font-medium text-dark-300 mb-2">
+                Vehicle (Make / Model / Year)
+              </label>
+              <input 
+                type="text" 
+                id="vehicle" 
+                name="vehicle" 
+                placeholder="e.g., Toyota Vios 2020"
+                class="input-field"
+              />
+            </div>
+            
+            <div>
+              <label for="notes" class="block text-sm font-medium text-dark-300 mb-2">
+                Additional Notes
+              </label>
+              <textarea 
+                id="notes" 
+                name="notes" 
+                rows="3"
+                placeholder="Any specific concerns or requests..."
+                class="input-field resize-none"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="pt-4">
+            <button 
+              type="submit" 
+              id="submit-btn"
+              class="w-full btn-primary text-lg py-4 flex items-center justify-center gap-2"
+            >
+              <span id="submit-text">Submit Booking Request</span>
+              <span id="submit-loading" class="hidden">
+                <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </span>
+            </button>
+            
+            <p class="text-dark-500 text-sm text-center mt-4">
+              By submitting, you agree to receive SMS/call confirmation from WheelPower Auto Shop.
+            </p>
+          </div>
+        </form>
+
+        <!-- Success Message (Hidden by default) -->
+        <div id="success-message" class="hidden text-center py-8">
+          <div class="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-white mb-2">Booking Request Sent!</h3>
+          <p class="text-dark-300 mb-6 max-w-md mx-auto">
+            Thank you! We've received your appointment request. We'll contact you within a few hours to confirm.
+          </p>
+          <div class="space-y-3">
+            <p class="text-dark-400 text-sm">
+              <span class="text-white font-medium">What's next?</span><br />
+              We'll call or text you to confirm your appointment time.
+            </p>
+          </div>
+          <div class="mt-8">
+            <a href="/" class="btn-secondary">
+              Back to Home
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Alternative -->
+      <div class="mt-8 text-center">
+        <p class="text-dark-400 mb-4">Prefer to book directly?</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="tel:+639XXXXXXXXX" class="inline-flex items-center justify-center gap-2 text-primary-400 hover:text-primary-300 transition-colors">
+            <span>📞</span>
+            <span>Call Us</span>
+          </a>
+          <span class="hidden sm:inline text-dark-600">|</span>
+          <a href="https://m.me/WheelPowerTiresAutocare" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 text-primary-400 hover:text-primary-300 transition-colors">
+            <span>💬</span>
+            <span>Message on Facebook</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Info Section -->
+  <section class="py-16 bg-dark-900/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="text-4xl mb-4">⚡</div>
+          <h3 class="font-bold text-white mb-2">Quick Confirmation</h3>
+          <p class="text-dark-400 text-sm">We'll confirm your booking within a few hours during business hours.</p>
+        </div>
+        <div class="text-center">
+          <div class="text-4xl mb-4">🔄</div>
+          <h3 class="font-bold text-white mb-2">Easy Rescheduling</h3>
+          <p class="text-dark-400 text-sm">Need to change your appointment? Just call us and we'll accommodate.</p>
+        </div>
+        <div class="text-center">
+          <div class="text-4xl mb-4">💯</div>
+          <h3 class="font-bold text-white mb-2">No Obligation</h3>
+          <p class="text-dark-400 text-sm">Get a quote first. No pressure to proceed with any service.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</MainLayout>
+
+<!-- Form Handling Script -->
+<script>
+  const form = document.getElementById('booking-form') as HTMLFormElement;
+  const submitBtn = document.getElementById('submit-btn');
+  const submitText = document.getElementById('submit-text');
+  const submitLoading = document.getElementById('submit-loading');
+  const successMessage = document.getElementById('success-message');
+
+  // Check URL params for pre-selected service
+  const urlParams = new URLSearchParams(window.location.search);
+  const preSelectedService = urlParams.get('service');
+  
+  if (preSelectedService) {
+    const serviceInput = document.querySelector(`input[name="service"][value="${preSelectedService}"]`) as HTMLInputElement;
+    if (serviceInput) {
+      serviceInput.checked = true;
+    }
+  }
+
+  // Form submission
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Show loading state
+      if (submitBtn && submitText && submitLoading) {
+        submitBtn.setAttribute('disabled', 'true');
+        submitText.classList.add('hidden');
+        submitLoading.classList.remove('hidden');
+      }
+
+      // Get form data
+      const formData = new FormData(form);
+      const data = {
+        service: formData.get('service'),
+        date: formData.get('date'),
+        time: formData.get('time'),
+        name: formData.get('name'),
+        phone: formData.get('phone'),
+        email: formData.get('email'),
+        vehicle: formData.get('vehicle'),
+        notes: formData.get('notes'),
+      };
+
+      // Simulate API call (replace with actual API endpoint later)
+      console.log('Booking data:', data);
+      
+      // Simulate delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Show success message
+      form.classList.add('hidden');
+      if (successMessage) {
+        successMessage.classList.remove('hidden');
+      }
+
+      // Scroll to top of form area
+      window.scrollTo({ top: 200, behavior: 'smooth' });
+    });
+  }
+</script>

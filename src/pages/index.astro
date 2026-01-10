@@ -1,0 +1,362 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+
+// Services data
+const services = [
+  { 
+    icon: '🔧', 
+    title: 'Tire Installation', 
+    description: 'Professional mounting and balancing for all tire sizes. We ensure perfect fit and optimal performance.',
+    href: '/services#tire-installation'
+  },
+  { 
+    icon: '📐', 
+    title: 'Wheel Alignment', 
+    description: 'Precision computerized alignment to extend tire life, improve handling, and ensure safe driving.',
+    href: '/services#wheel-alignment'
+  },
+  { 
+    icon: '🛠️', 
+    title: 'Vulcanizing', 
+    description: 'Expert tire repair services to fix punctures and damage, getting you back on the road quickly.',
+    href: '/services#vulcanizing'
+  },
+  { 
+    icon: '🛢️', 
+    title: 'Oil Change', 
+    description: 'Quality oil changes using premium lubricants to keep your engine running smoothly.',
+    href: '/services#oil-change'
+  },
+  { 
+    icon: '🔍', 
+    title: 'Preventive Maintenance', 
+    description: 'Comprehensive vehicle checkups to prevent problems before they happen and extend vehicle life.',
+    href: '/services#preventive-maintenance'
+  },
+  { 
+    icon: '⚙️', 
+    title: 'Underchassis Repair', 
+    description: 'Complete suspension, steering, and chassis services for a smooth and safe ride.',
+    href: '/services#underchassis'
+  },
+];
+
+// Tire brands
+const tireBrands = ['Sailun', 'Radar', 'Comforser', 'Thunderer', 'Apollo', 'Toyo', 'Dunlop'];
+
+// Stats
+const stats = [
+  { number: '500+', label: 'Happy Customers' },
+  { number: '7+', label: 'Tire Brands' },
+  { number: '8AM-5PM', label: 'Daily Service' },
+  { number: '⭐ 4.9', label: 'Google Rating' },
+];
+
+// Why choose us
+const whyChooseUs = [
+  {
+    icon: '✓',
+    title: 'Quality Products',
+    description: 'We only carry trusted tire brands known for durability and performance.'
+  },
+  {
+    icon: '✓',
+    title: 'Expert Technicians',
+    description: 'Our skilled team has years of experience in tire and auto care services.'
+  },
+  {
+    icon: '✓',
+    title: 'Fair Pricing',
+    description: 'Competitive prices with no hidden fees. Get value for your money.'
+  },
+  {
+    icon: '✓',
+    title: 'Fast Service',
+    description: 'We respect your time. Most services completed within the hour.'
+  },
+];
+---
+
+<MainLayout title="Home">
+  
+  <!-- Hero Section -->
+  <section class="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+    <!-- Background -->
+    <div class="absolute inset-0 bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950">
+      <!-- Decorative grid pattern -->
+      <div class="absolute inset-0 opacity-5" style="background-image: radial-gradient(circle at 2px 2px, #f97316 1px, transparent 0); background-size: 40px 40px;"></div>
+    </div>
+    
+    <!-- Decorative blurs -->
+    <div class="absolute top-1/4 right-0 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-1/4 left-0 w-64 h-64 bg-primary-600/10 rounded-full blur-3xl"></div>
+    
+    <!-- Content -->
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+      <!-- Badge -->
+      <div class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/10 border border-primary-500/30 rounded-full text-primary-400 text-sm font-medium mb-8 animate-fade-in">
+        <span>🏆</span>
+        <span>Trusted Auto Care in Rizal Since Day One</span>
+      </div>
+      
+      <!-- Main heading -->
+      <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight animate-slide-up">
+        <span class="text-white">Quality Tires &</span>
+        <br />
+        <span class="bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent">
+          Expert Auto Care
+        </span>
+      </h1>
+      
+      <!-- Subtitle -->
+      <p class="text-dark-300 text-lg md:text-xl max-w-2xl mx-auto mb-10 animate-slide-up" style="animation-delay: 0.1s;">
+        Your trusted partner for premium tires, professional wheel alignment, 
+        and complete auto care services along Marilaque Highway, Baras, Rizal.
+      </p>
+      
+      <!-- CTA Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up" style="animation-delay: 0.2s;">
+        <a href="/book" class="btn-primary text-lg px-8 py-4">
+          📅 Book Appointment
+        </a>
+        <a href="/services" class="btn-secondary text-lg px-8 py-4">
+          View Services
+        </a>
+      </div>
+      
+      <!-- Stats -->
+      <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto animate-fade-in" style="animation-delay: 0.3s;">
+        {stats.map((stat) => (
+          <div class="text-center">
+            <div class="text-2xl md:text-3xl font-bold text-primary-400">{stat.number}</div>
+            <div class="text-dark-400 text-sm">{stat.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+    
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+      <svg class="w-6 h-6 text-dark-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+      </svg>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section class="py-20 bg-dark-900/50" id="services">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Section header -->
+      <div class="text-center mb-12">
+        <p class="section-subtitle">Our Services</p>
+        <h2 class="section-title">What We Offer</h2>
+        <p class="text-dark-400 mt-4 max-w-2xl mx-auto">
+          From tire installation to complete auto maintenance, we've got your vehicle covered.
+        </p>
+      </div>
+      
+      <!-- Services grid -->
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {services.map((service) => (
+          <a href={service.href} class="card p-6 group cursor-pointer">
+            <div class="text-4xl mb-4">{service.icon}</div>
+            <h3 class="text-xl font-bold text-white mb-2 group-hover:text-primary-400 transition-colors">
+              {service.title}
+            </h3>
+            <p class="text-dark-400 text-sm leading-relaxed">
+              {service.description}
+            </p>
+            <div class="mt-4 text-primary-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+              Learn more →
+            </div>
+          </a>
+        ))}
+      </div>
+      
+      <!-- View all link -->
+      <div class="text-center mt-10">
+        <a href="/services" class="text-primary-400 font-semibold hover:text-primary-300 transition-colors">
+          View All Services →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tire Brands Section -->
+  <section class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <p class="section-subtitle">Tire Brands</p>
+        <h2 class="section-title">Premium Brands We Carry</h2>
+        <p class="text-dark-400 mt-4 max-w-2xl mx-auto">
+          We partner with leading tire manufacturers to bring you quality options for every budget and need.
+        </p>
+      </div>
+      
+      <div class="flex flex-wrap justify-center gap-4">
+        {tireBrands.map((brand) => (
+          <a 
+            href={`/tires?brand=${brand.toLowerCase()}`}
+            class="px-8 py-4 bg-dark-800/50 rounded-xl border border-dark-700/50 hover:border-primary-500/50 hover:bg-dark-800 transition-all cursor-pointer group"
+          >
+            <span class="font-bold text-lg text-white group-hover:text-primary-400 transition-colors">{brand}</span>
+          </a>
+        ))}
+      </div>
+      
+      <div class="text-center mt-10">
+        <a href="/tires" class="btn-primary">
+          Browse All Tires
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Choose Us Section -->
+  <section class="py-20 bg-dark-900/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <!-- Left content -->
+        <div>
+          <p class="section-subtitle">Why Choose Us</p>
+          <h2 class="section-title mb-6">Your Trusted Auto Care Partner</h2>
+          <p class="text-dark-300 mb-8 leading-relaxed">
+            At WheelPower, we're more than just a tire shop. We're your partners in keeping your vehicle safe and road-ready. 
+            Located along Marilaque Highway in Baras, Rizal, we've built our reputation on quality service and customer satisfaction.
+          </p>
+          
+          <div class="space-y-4">
+            {whyChooseUs.map((item) => (
+              <div class="flex gap-4">
+                <div class="w-8 h-8 bg-primary-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span class="text-primary-400 font-bold">{item.icon}</span>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-white">{item.title}</h4>
+                  <p class="text-dark-400 text-sm">{item.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div class="mt-8">
+            <a href="/contact" class="btn-secondary">
+              Learn More About Us
+            </a>
+          </div>
+        </div>
+        
+        <!-- Right content - Image placeholder -->
+        <div class="relative">
+          <div class="aspect-square bg-gradient-to-br from-dark-800 to-dark-900 rounded-2xl border border-dark-700/50 flex items-center justify-center overflow-hidden">
+            <!-- This will be replaced with actual shop image -->
+            <div class="text-center p-8">
+              <div class="text-6xl mb-4">🏪</div>
+              <p class="text-dark-400">Shop Photo</p>
+              <p class="text-dark-500 text-sm">(Will be replaced with actual image)</p>
+            </div>
+          </div>
+          <!-- Decorative element -->
+          <div class="absolute -bottom-4 -right-4 w-24 h-24 bg-primary-500/20 rounded-full blur-2xl"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20 bg-gradient-to-r from-primary-600 to-primary-500 relative overflow-hidden">
+    <!-- Background pattern -->
+    <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 30px 30px;"></div>
+    
+    <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+        Ready to Get Started?
+      </h2>
+      <p class="text-primary-100 text-lg mb-8 max-w-2xl mx-auto">
+        Book your appointment today or visit us at Marilaque Highway, Baras, Rizal. 
+        We're open daily from 8:00 AM to 5:00 PM.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/book" class="bg-white text-primary-600 font-bold px-8 py-4 rounded-full hover:shadow-xl hover:shadow-white/20 transition-all transform hover:scale-105">
+          📅 Book Appointment
+        </a>
+        <a href="tel:+639XXXXXXXXX" class="bg-transparent border-2 border-white text-white font-bold px-8 py-4 rounded-full hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+          <span>📞</span>
+          <span>Call Now</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Location Section -->
+  <section class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <p class="section-subtitle">Find Us</p>
+        <h2 class="section-title">Our Location</h2>
+        <p class="text-dark-400 mt-4">
+          Conveniently located along Marilaque Highway, Baras, Rizal
+        </p>
+      </div>
+      
+      <div class="grid lg:grid-cols-3 gap-8">
+        <!-- Map -->
+        <div class="lg:col-span-2 aspect-video bg-dark-800 rounded-2xl overflow-hidden border border-dark-700/50">
+          <!-- Replace this with actual Google Maps embed -->
+          <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3860.7692!2d121.2731!3d14.5231!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTTCsDMxJzIzLjIiTiAxMjHCsDE2JzIzLjIiRQ!5e0!3m2!1sen!2sph!4v1234567890"
+            width="100%" 
+            height="100%" 
+            style="border:0;" 
+            allowfullscreen="" 
+            loading="lazy" 
+            referrerpolicy="no-referrer-when-downgrade"
+            title="WheelPower Auto Shop Location"
+            class="grayscale hover:grayscale-0 transition-all duration-500"
+          ></iframe>
+        </div>
+        
+        <!-- Contact Info Card -->
+        <div class="card p-8">
+          <h3 class="text-xl font-bold text-white mb-6">Visit Us</h3>
+          
+          <div class="space-y-6">
+            <div>
+              <h4 class="text-primary-400 font-medium mb-2">📍 Address</h4>
+              <p class="text-dark-300">
+                Marilaque Highway,<br />
+                Baras, Rizal,<br />
+                Philippines
+              </p>
+            </div>
+            
+            <div>
+              <h4 class="text-primary-400 font-medium mb-2">🕐 Business Hours</h4>
+              <p class="text-dark-300">
+                Monday - Sunday<br />
+                <span class="font-semibold text-white">8:00 AM - 5:00 PM</span>
+              </p>
+            </div>
+            
+            <div>
+              <h4 class="text-primary-400 font-medium mb-2">📞 Phone</h4>
+              <a href="tel:+639XXXXXXXXX" class="text-dark-300 hover:text-primary-400 transition-colors">
+                +63 9XX XXX XXXX
+              </a>
+            </div>
+            
+            <a 
+              href="https://maps.google.com/?q=WheelPower+Auto+Shop+Baras+Rizal" 
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-primary w-full text-center block"
+            >
+              Get Directions
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</MainLayout>

@@ -1,0 +1,327 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+---
+
+<MainLayout 
+  title="Contact Us" 
+  description="Get in touch with WheelPower Auto Shop. Visit us at Marilaque Highway, Baras, Rizal or call us for tire and auto care inquiries."
+>
+
+  <!-- Page Header -->
+  <section class="bg-gradient-to-b from-dark-900 to-dark-950 py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <p class="section-subtitle">Get in Touch</p>
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Contact Us</h1>
+      <p class="text-dark-300 text-lg max-w-2xl mx-auto">
+        Have questions? Need a quote? We're here to help. Reach out through any of the channels below.
+      </p>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="py-12 md:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-12">
+        
+        <!-- Contact Information -->
+        <div>
+          <h2 class="text-2xl font-bold text-white mb-8">Contact Information</h2>
+          
+          <div class="space-y-6">
+            <!-- Address -->
+            <div class="flex gap-4">
+              <div class="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                <span class="text-2xl">📍</span>
+              </div>
+              <div>
+                <h3 class="font-semibold text-white mb-1">Shop Address</h3>
+                <p class="text-dark-300">
+                  Marilaque Highway,<br />
+                  Baras, Rizal,<br />
+                  Philippines
+                </p>
+                <a 
+                  href="https://maps.google.com/?q=WheelPower+Auto+Shop+Baras+Rizal" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-1 text-primary-400 hover:text-primary-300 text-sm mt-2 transition-colors"
+                >
+                  <span>Get Directions</span>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="flex gap-4">
+              <div class="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                <span class="text-2xl">📞</span>
+              </div>
+              <div>
+                <h3 class="font-semibold text-white mb-1">Phone Number</h3>
+                <a 
+                  href="tel:+639XXXXXXXXX" 
+                  class="text-dark-300 hover:text-primary-400 transition-colors text-lg"
+                >
+                  +63 9XX XXX XXXX
+                </a>
+                <p class="text-dark-500 text-sm mt-1">Call or text anytime</p>
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="flex gap-4">
+              <div class="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                <span class="text-2xl">✉️</span>
+              </div>
+              <div>
+                <h3 class="font-semibold text-white mb-1">Email Address</h3>
+                <a 
+                  href="mailto:info@wheelpowerautoshop.com" 
+                  class="text-dark-300 hover:text-primary-400 transition-colors"
+                >
+                  info@wheelpowerautoshop.com
+                </a>
+                <p class="text-dark-500 text-sm mt-1">We reply within 24 hours</p>
+              </div>
+            </div>
+
+            <!-- Business Hours -->
+            <div class="flex gap-4">
+              <div class="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                <span class="text-2xl">🕐</span>
+              </div>
+              <div>
+                <h3 class="font-semibold text-white mb-1">Business Hours</h3>
+                <p class="text-dark-300">Monday - Sunday</p>
+                <p class="text-primary-400 font-semibold">8:00 AM - 5:00 PM</p>
+                <p class="text-dark-500 text-sm mt-1">Open 7 days a week</p>
+              </div>
+            </div>
+
+            <!-- Facebook -->
+            <div class="flex gap-4">
+              <div class="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                <span class="text-2xl">📱</span>
+              </div>
+              <div>
+                <h3 class="font-semibold text-white mb-1">Social Media</h3>
+                <a 
+                  href="https://www.facebook.com/WheelPowerTiresAutocare" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-dark-300 hover:text-primary-400 transition-colors"
+                >
+                  facebook.com/WheelPowerTiresAutocare
+                </a>
+                <p class="text-dark-500 text-sm mt-1">Follow us for updates and promos</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="mt-10 flex flex-wrap gap-4">
+            <a href="tel:+639XXXXXXXXX" class="btn-primary">
+              📞 Call Now
+            </a>
+            <a href="https://m.me/WheelPowerTiresAutocare" target="_blank" rel="noopener noreferrer" class="btn-secondary">
+              💬 Message Us
+            </a>
+          </div>
+        </div>
+
+        <!-- Contact Form -->
+        <div>
+          <div class="card p-6 md:p-8">
+            <h2 class="text-2xl font-bold text-white mb-6">Send Us a Message</h2>
+            
+            <form id="contact-form" class="space-y-5">
+              <div>
+                <label for="name" class="block text-sm font-medium text-dark-300 mb-2">
+                  Your Name *
+                </label>
+                <input 
+                  type="text" 
+                  id="name" 
+                  name="name" 
+                  required
+                  placeholder="Juan Dela Cruz"
+                  class="input-field"
+                />
+              </div>
+              
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="phone" class="block text-sm font-medium text-dark-300 mb-2">
+                    Phone Number *
+                  </label>
+                  <input 
+                    type="tel" 
+                    id="phone" 
+                    name="phone" 
+                    required
+                    placeholder="0917 123 4567"
+                    class="input-field"
+                  />
+                </div>
+                
+                <div>
+                  <label for="email" class="block text-sm font-medium text-dark-300 mb-2">
+                    Email Address
+                  </label>
+                  <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    placeholder="juan@email.com"
+                    class="input-field"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label for="subject" class="block text-sm font-medium text-dark-300 mb-2">
+                  Subject *
+                </label>
+                <select id="subject" name="subject" required class="input-field">
+                  <option value="">Select a topic</option>
+                  <option value="tire-inquiry">Tire Inquiry / Pricing</option>
+                  <option value="mags-inquiry">Mags / Wheels Inquiry</option>
+                  <option value="service-inquiry">Service Inquiry</option>
+                  <option value="appointment">Appointment Question</option>
+                  <option value="feedback">Feedback / Suggestion</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              
+              <div>
+                <label for="message" class="block text-sm font-medium text-dark-300 mb-2">
+                  Message *
+                </label>
+                <textarea 
+                  id="message" 
+                  name="message" 
+                  rows="5"
+                  required
+                  placeholder="How can we help you?"
+                  class="input-field resize-none"
+                ></textarea>
+              </div>
+              
+              <button 
+                type="submit" 
+                id="submit-btn"
+                class="w-full btn-primary py-4 flex items-center justify-center gap-2"
+              >
+                <span id="submit-text">Send Message</span>
+                <span id="submit-loading" class="hidden">
+                  <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </span>
+              </button>
+            </form>
+
+            <!-- Success Message (Hidden by default) -->
+            <div id="success-message" class="hidden text-center py-8">
+              <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold text-white mb-2">Message Sent!</h3>
+              <p class="text-dark-300">Thank you for reaching out. We'll get back to you soon!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Map Section -->
+  <section class="py-12 md:py-16 bg-dark-900/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl font-bold text-white mb-2">Find Us</h2>
+        <p class="text-dark-400">Located along Marilaque Highway, Baras, Rizal</p>
+      </div>
+      
+      <div class="aspect-[21/9] bg-dark-800 rounded-2xl overflow-hidden border border-dark-700/50">
+        <!-- Replace with actual Google Maps embed -->
+        <iframe 
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3860.7692!2d121.2731!3d14.5231!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTTCsDMxJzIzLjIiTiAxMjHCsDE2JzIzLjIiRQ!5e0!3m2!1sen!2sph!4v1234567890"
+          width="100%" 
+          height="100%" 
+          style="border:0;" 
+          allowfullscreen="" 
+          loading="lazy" 
+          referrerpolicy="no-referrer-when-downgrade"
+          title="WheelPower Auto Shop Location"
+          class="grayscale hover:grayscale-0 transition-all duration-500"
+        ></iframe>
+      </div>
+      
+      <div class="text-center mt-6">
+        <a 
+          href="https://maps.google.com/?q=WheelPower+Auto+Shop+Baras+Rizal" 
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-secondary inline-flex items-center gap-2"
+        >
+          <span>Open in Google Maps</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</MainLayout>
+
+<!-- Form Handling Script -->
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement;
+  const submitBtn = document.getElementById('submit-btn');
+  const submitText = document.getElementById('submit-text');
+  const submitLoading = document.getElementById('submit-loading');
+  const successMessage = document.getElementById('success-message');
+
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Show loading state
+      if (submitBtn && submitText && submitLoading) {
+        submitBtn.setAttribute('disabled', 'true');
+        submitText.classList.add('hidden');
+        submitLoading.classList.remove('hidden');
+      }
+
+      // Get form data
+      const formData = new FormData(form);
+      const data = {
+        name: formData.get('name'),
+        phone: formData.get('phone'),
+        email: formData.get('email'),
+        subject: formData.get('subject'),
+        message: formData.get('message'),
+      };
+
+      // Simulate API call (replace with actual API endpoint later)
+      console.log('Contact form data:', data);
+      
+      // Simulate delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Show success message
+      form.classList.add('hidden');
+      if (successMessage) {
+        successMessage.classList.remove('hidden');
+      }
+    });
+  }
+</script>
