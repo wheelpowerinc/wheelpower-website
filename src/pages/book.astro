@@ -1,24 +1,35 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
+import { getSiteSettings, getServices } from '../lib/directus.js';
 
-// Services available for booking
-const services = [
+// Fetch site settings and services from Directus
+const siteSettings = await getSiteSettings();
+const directusServices = await getServices();
+
+const settings = siteSettings || {};
+const phone = settings.phone || '+63 9XX XXX XXXX';
+
+// Fallback services if Directus is unavailable
+const fallbackServices = [
   { id: 'tire-installation', name: 'Tire Installation', duration: '30-60 mins', price: 'From ₱300/tire' },
   { id: 'wheel-alignment', name: 'Wheel Alignment', duration: '45-60 mins', price: 'From ₱800' },
   { id: 'vulcanizing', name: 'Vulcanizing / Tire Repair', duration: '15-30 mins', price: 'From ₱150' },
   { id: 'oil-change', name: 'Oil Change', duration: '20-30 mins', price: 'From ₱800' },
   { id: 'preventive-maintenance', name: 'Preventive Maintenance', duration: '1-2 hours', price: 'From ₱1,500' },
   { id: 'underchassis', name: 'Underchassis Repair', duration: 'Varies', price: 'Get Quote' },
-  { id: 'tire-purchase', name: 'Tire Purchase & Install', duration: '1 hour', price: 'Based on tire' },
-  { id: 'mags-purchase', name: 'Mags Purchase & Install', duration: '1-2 hours', price: 'Based on mags' },
-  { id: 'other', name: 'Other / General Inquiry', duration: 'Varies', price: 'Get Quote' },
 ];
+
+// Use Directus services if available, otherwise use fallback
+const services = directusServices && directusServices.length > 0 ? directusServices : fallbackServices;
 
 // Available time slots
 const timeSlots = [
   '8:00 AM', '8:30 AM', '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
   '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM', '4:00 PM'
 ];
+
+// WEB3FORMS ACCESS KEY - Replace with your actual key
+const WEB3FORMS_KEY = '528eb7cc-b0d5-4bbe-98f5-9d274734f8ba';
 ---
 
 <MainLayout 
@@ -43,7 +54,22 @@ const timeSlots = [
       
       <!-- Form Card -->
       <div class="card p-6 md:p-8">
-        <form id="booking-form" class="space-y-8">
+        <form id="booking-form" action="https://api.web3forms.com/submit" method="POST" class="space-y-8">
+          
+          <!-- Web3Forms Access Key (Hidden) -->
+          <input type="hidden" name="access_key" value={WEB3FORMS_KEY} />
+          
+          <!-- Form Subject (Hidden) -->
+          <input type="hidden" name="subject" value="🚗 New Booking Request - WheelPower Auto Shop" />
+          
+          <!-- From Name (Hidden) -->
+          <input type="hidden" name="from_name" value="WheelPower Website" />
+          
+          <!-- Redirect after submission (Hidden) -->
+          <input type="hidden" name="redirect" value="https://wheelpowerautoshop.com/book/success" />
+          
+          <!-- Honeypot Spam Protection (Hidden) -->
+          <input type="checkbox" name="botcheck" class="hidden" style="display: none;" />
           
           <!-- Step 1: Select Service -->
           <div class="space-y-4">
@@ -60,16 +86,34 @@ const timeSlots = [
                   <input 
                     type="radio" 
                     name="service" 
-                    value={service.id}
+                    value={service.name}
                     required
                     class="mt-1 w-4 h-4 text-primary-500 bg-dark-800 border-dark-600 focus:ring-primary-500 focus:ring-2"
                   />
                   <div class="flex-1">
                     <div class="font-medium text-white">{service.name}</div>
-                    <div class="text-sm text-dark-400">{service.duration} • {service.price}</div>
+                    <div class="text-sm text-dark-400">
+                      {service.duration || 'Contact for estimate'} • {service.price || 'Get Quote'}
+                    </div>
                   </div>
                 </label>
               ))}
+              
+              <!-- Always show "Other" option -->
+              <label 
+                class="service-option relative flex items-start gap-3 p-4 rounded-xl border-2 border-dark-700 hover:border-primary-500/50 cursor-pointer transition-all has-[:checked]:border-primary-500 has-[:checked]:bg-primary-500/10"
+              >
+                <input 
+                  type="radio" 
+                  name="service" 
+                  value="Other / General Inquiry"
+                  class="mt-1 w-4 h-4 text-primary-500 bg-dark-800 border-dark-600 focus:ring-primary-500 focus:ring-2"
+                />
+                <div class="flex-1">
+                  <div class="font-medium text-white">Other / General Inquiry</div>
+                  <div class="text-sm text-dark-400">Varies • Get Quote</div>
+                </div>
+              </label>
             </div>
           </div>
 
@@ -91,7 +135,7 @@ const timeSlots = [
                 <input 
                   type="date" 
                   id="date" 
-                  name="date" 
+                  name="preferred_date" 
                   required
                   min={new Date().toISOString().split('T')[0]}
                   class="input-field"
@@ -102,7 +146,7 @@ const timeSlots = [
                 <label for="time" class="block text-sm font-medium text-dark-300 mb-2">
                   Preferred Time *
                 </label>
-                <select id="time" name="time" required class="input-field">
+                <select id="time" name="preferred_time" required class="input-field">
                   <option value="">Select a time</option>
                   {timeSlots.map((slot) => (
                     <option value={slot}>{slot}</option>
@@ -134,7 +178,7 @@ const timeSlots = [
                 <input 
                   type="text" 
                   id="name" 
-                  name="name" 
+                  name="customer_name" 
                   required
                   placeholder="Juan Dela Cruz"
                   class="input-field"
@@ -217,37 +261,13 @@ const timeSlots = [
             </p>
           </div>
         </form>
-
-        <!-- Success Message (Hidden by default) -->
-        <div id="success-message" class="hidden text-center py-8">
-          <div class="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h3 class="text-2xl font-bold text-white mb-2">Booking Request Sent!</h3>
-          <p class="text-dark-300 mb-6 max-w-md mx-auto">
-            Thank you! We've received your appointment request. We'll contact you within a few hours to confirm.
-          </p>
-          <div class="space-y-3">
-            <p class="text-dark-400 text-sm">
-              <span class="text-white font-medium">What's next?</span><br />
-              We'll call or text you to confirm your appointment time.
-            </p>
-          </div>
-          <div class="mt-8">
-            <a href="/" class="btn-secondary">
-              Back to Home
-            </a>
-          </div>
-        </div>
       </div>
 
       <!-- Contact Alternative -->
       <div class="mt-8 text-center">
         <p class="text-dark-400 mb-4">Prefer to book directly?</p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <a href="tel:+639XXXXXXXXX" class="inline-flex items-center justify-center gap-2 text-primary-400 hover:text-primary-300 transition-colors">
+          <a href={`tel:${phone.replace(/\s/g, '')}`} class="inline-flex items-center justify-center gap-2 text-primary-400 hover:text-primary-300 transition-colors">
             <span>📞</span>
             <span>Call Us</span>
           </a>
@@ -286,64 +306,35 @@ const timeSlots = [
 
 </MainLayout>
 
-<!-- Form Handling Script -->
+<!-- Form Submission Handler -->
 <script>
-  const form = document.getElementById('booking-form') as HTMLFormElement;
+  const form = document.getElementById('booking-form');
   const submitBtn = document.getElementById('submit-btn');
   const submitText = document.getElementById('submit-text');
   const submitLoading = document.getElementById('submit-loading');
-  const successMessage = document.getElementById('success-message');
 
   // Check URL params for pre-selected service
   const urlParams = new URLSearchParams(window.location.search);
   const preSelectedService = urlParams.get('service');
   
   if (preSelectedService) {
-    const serviceInput = document.querySelector(`input[name="service"][value="${preSelectedService}"]`) as HTMLInputElement;
-    if (serviceInput) {
-      serviceInput.checked = true;
-    }
+    const serviceInputs = document.querySelectorAll('input[name="service"]');
+    serviceInputs.forEach((input) => {
+      const inputValue = input.value.toLowerCase().replace(/\s+/g, '-');
+      if (inputValue.includes(preSelectedService) || preSelectedService.includes(inputValue)) {
+        input.checked = true;
+      }
+    });
   }
 
-  // Form submission
+  // Form submission - show loading state
   if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      // Show loading state
+    form.addEventListener('submit', () => {
       if (submitBtn && submitText && submitLoading) {
         submitBtn.setAttribute('disabled', 'true');
         submitText.classList.add('hidden');
         submitLoading.classList.remove('hidden');
       }
-
-      // Get form data
-      const formData = new FormData(form);
-      const data = {
-        service: formData.get('service'),
-        date: formData.get('date'),
-        time: formData.get('time'),
-        name: formData.get('name'),
-        phone: formData.get('phone'),
-        email: formData.get('email'),
-        vehicle: formData.get('vehicle'),
-        notes: formData.get('notes'),
-      };
-
-      // Simulate API call (replace with actual API endpoint later)
-      console.log('Booking data:', data);
-      
-      // Simulate delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Show success message
-      form.classList.add('hidden');
-      if (successMessage) {
-        successMessage.classList.remove('hidden');
-      }
-
-      // Scroll to top of form area
-      window.scrollTo({ top: 200, behavior: 'smooth' });
     });
   }
 </script>

@@ -1,0 +1,70 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import { getSiteSettings } from '../../lib/directus.js';
+
+// Fetch site settings
+const siteSettings = await getSiteSettings();
+const settings = siteSettings || {};
+const phone = settings.phone || '+63 9XX XXX XXXX';
+---
+
+<MainLayout title="Booking Submitted">
+  <section class="min-h-[70vh] flex items-center justify-center py-20">
+    <div class="max-w-xl mx-auto px-4 text-center">
+      
+      <!-- Success Icon -->
+      <div class="w-24 h-24 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-8">
+        <svg class="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      
+      <!-- Message -->
+      <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">
+        Booking Request Sent!
+      </h1>
+      
+      <p class="text-dark-300 text-lg mb-8">
+        Thank you for choosing WheelPower Auto Shop! We've received your appointment request and will contact you shortly to confirm.
+      </p>
+      
+      <!-- What's Next -->
+      <div class="card p-6 mb-8 text-left">
+        <h3 class="font-bold text-white mb-4">📋 What happens next?</h3>
+        <ul class="space-y-3 text-dark-300">
+          <li class="flex items-start gap-3">
+            <span class="text-primary-400 font-bold">1.</span>
+            <span>We'll review your booking request</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-primary-400 font-bold">2.</span>
+            <span>We'll call or text you within a few hours to confirm</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-primary-400 font-bold">3.</span>
+            <span>Visit us at the confirmed date and time</span>
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Contact Info -->
+      <p class="text-dark-400 mb-6">
+        Have questions? Call us at{' '}
+        <a href={`tel:${phone.replace(/\s/g, '')}`} class="text-primary-400 hover:text-primary-300">
+          {phone}
+        </a>
+      </p>
+      
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/" class="btn-primary">
+          🏠 Back to Home
+        </a>
+        <a href="/services" class="btn-secondary">
+          View Our Services
+        </a>
+      </div>
+      
+    </div>
+  </section>
+</MainLayout>
