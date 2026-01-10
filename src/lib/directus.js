@@ -74,7 +74,7 @@ export async function getGallery() {
  */
 export async function getSiteSettings() {
   try {
-    const response = await fetch(`${DIRECTUS_URL}/items/site_settings`);
+    const response = await fetch(`${DIRECTUS_URL}/items/settings`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
