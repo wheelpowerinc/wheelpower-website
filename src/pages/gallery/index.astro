@@ -1,120 +1,25 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
+import { getGallery, getImageUrl } from '../../lib/directus.js';
+
+// Fetch gallery from Directus
+const directusGallery = await getGallery();
 
 // Gallery categories
 const categories = ['All', 'Shop', 'Services', 'Tires', 'Mags', 'Customers'];
 
-// Sample gallery data - Later this will come from your admin panel
-const galleryItems = [
-  {
-    id: 1,
-    category: 'shop',
-    title: 'WheelPower Shop Front',
-    description: 'Our shop along Marilaque Highway, Baras, Rizal',
-    image: null,
-  },
-  {
-    id: 2,
-    category: 'shop',
-    title: 'Service Bay Area',
-    description: 'Spacious work area for multiple vehicles',
-    image: null,
-  },
-  {
-    id: 3,
-    category: 'shop',
-    title: 'Tire Display',
-    description: 'Wide selection of tire brands available',
-    image: null,
-  },
-  {
-    id: 4,
-    category: 'services',
-    title: 'Wheel Alignment in Progress',
-    description: 'Computerized alignment for precision results',
-    image: null,
-  },
-  {
-    id: 5,
-    category: 'services',
-    title: 'Tire Installation',
-    description: 'Professional mounting and balancing',
-    image: null,
-  },
-  {
-    id: 6,
-    category: 'services',
-    title: 'Vulcanizing Work',
-    description: 'Expert tire repair services',
-    image: null,
-  },
-  {
-    id: 7,
-    category: 'tires',
-    title: 'Sailun Tires',
-    description: 'Quality passenger and SUV tires',
-    image: null,
-  },
-  {
-    id: 8,
-    category: 'tires',
-    title: 'Radar Tires',
-    description: 'Performance and all-terrain options',
-    image: null,
-  },
-  {
-    id: 9,
-    category: 'tires',
-    title: 'Premium Brands',
-    description: 'Toyo, Dunlop, and more',
-    image: null,
-  },
-  {
-    id: 10,
-    category: 'mags',
-    title: 'Rota Wheels Display',
-    description: 'Popular designs for all vehicles',
-    image: null,
-  },
-  {
-    id: 11,
-    category: 'mags',
-    title: 'XXR Collection',
-    description: 'Aggressive styles for stance builds',
-    image: null,
-  },
-  {
-    id: 12,
-    category: 'mags',
-    title: 'Premium Japanese Wheels',
-    description: 'Rays, Work, Enkei, and more',
-    image: null,
-  },
-  {
-    id: 13,
-    category: 'customers',
-    title: 'Happy Customer - Honda Civic',
-    description: 'Fresh set of tires and alignment',
-    image: null,
-  },
-  {
-    id: 14,
-    category: 'customers',
-    title: 'SUV Transformation',
-    description: 'New all-terrain tires installed',
-    image: null,
-  },
-  {
-    id: 15,
-    category: 'customers',
-    title: 'Wheel Upgrade',
-    description: 'Customer with new mag wheels',
-    image: null,
-  },
+// Fallback data in case Directus is unavailable or empty
+const fallbackGallery = [
+  { id: 1, category: 'shop', title: 'WheelPower Shop Front', description: 'Our shop along Marilaque Highway', image: null },
+  { id: 2, category: 'services', title: 'Wheel Alignment', description: 'Precision alignment service', image: null },
+  { id: 3, category: 'tires', title: 'Tire Display', description: 'Wide selection of brands', image: null },
 ];
 
+// Use Directus data if available, otherwise use fallback
+const galleryItems = directusGallery && directusGallery.length > 0 ? directusGallery : fallbackGallery;
+
 // Placeholder icons for different categories
-const categoryIcons: Record<string, string> = {
+const categoryIcons = {
   shop: '🏪',
   services: '🔧',
   tires: '🔘',
@@ -169,53 +74,77 @@ const categoryIcons: Record<string, string> = {
       
       <!-- Gallery Grid -->
       <div id="gallery-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {galleryItems.map((item) => (
-          <div 
-            class="gallery-item group cursor-pointer"
-            data-category={item.category}
-          >
-            <div class="card overflow-hidden">
-              <!-- Image -->
-              <div class="aspect-[4/3] bg-gradient-to-br from-dark-800 to-dark-900 relative overflow-hidden">
-                <div class="absolute inset-0 flex items-center justify-center">
-                  <div class="text-center">
-                    <div class="text-5xl mb-2">{categoryIcons[item.category]}</div>
-                    <p class="text-dark-500 text-sm">(Photo placeholder)</p>
-                  </div>
-                </div>
-                
-                <!-- Overlay on hover -->
-                <div class="absolute inset-0 bg-primary-500/0 group-hover:bg-primary-500/20 transition-colors flex items-center justify-center">
-                  <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                      </svg>
+        {galleryItems.map((item) => {
+          const categoryValue = typeof item.category === 'string' ? item.category.toLowerCase() : 'shop';
+          const iconKey = categoryValue as keyof typeof categoryIcons;
+          
+          return (
+            <div 
+              class="gallery-item group cursor-pointer"
+              data-category={categoryValue}
+            >
+              <div class="card overflow-hidden">
+                <!-- Image -->
+                <div class="aspect-[4/3] bg-gradient-to-br from-dark-800 to-dark-900 relative overflow-hidden">
+                  {item.image ? (
+                    <img 
+                      src={getImageUrl(item.image)} 
+                      alt={item.title}
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div class="absolute inset-0 flex items-center justify-center">
+                      <div class="text-center">
+                        <div class="text-5xl mb-2">{categoryIcons[iconKey] || '📷'}</div>
+                        <p class="text-dark-500 text-sm">(Photo placeholder)</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <!-- Overlay on hover -->
+                  <div class="absolute inset-0 bg-primary-500/0 group-hover:bg-primary-500/20 transition-colors flex items-center justify-center">
+                    <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                        </svg>
+                      </div>
                     </div>
                   </div>
+                  
+                  <!-- Category Badge -->
+                  <div class="absolute top-3 left-3">
+                    <span class="px-2 py-1 bg-dark-900/80 backdrop-blur-sm rounded-full text-xs font-medium text-dark-200 capitalize">
+                      {categoryValue}
+                    </span>
+                  </div>
                 </div>
                 
-                <!-- Category Badge -->
-                <div class="absolute top-3 left-3">
-                  <span class="px-2 py-1 bg-dark-900/80 backdrop-blur-sm rounded-full text-xs font-medium text-dark-200 capitalize">
-                    {item.category}
-                  </span>
+                <!-- Info -->
+                <div class="p-4">
+                  <h3 class="font-bold text-white group-hover:text-primary-400 transition-colors mb-1">
+                    {item.title}
+                  </h3>
+                  {item.description && (
+                    <p class="text-dark-400 text-sm">{item.description}</p>
+                  )}
                 </div>
               </div>
-              
-              <!-- Info -->
-              <div class="p-4">
-                <h3 class="font-bold text-white group-hover:text-primary-400 transition-colors mb-1">
-                  {item.title}
-                </h3>
-                <p class="text-dark-400 text-sm">{item.description}</p>
-              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       
-      <!-- Empty State (hidden by default) -->
+      <!-- Empty State -->
+      {galleryItems.length === 0 && (
+        <div class="text-center py-16">
+          <div class="text-6xl mb-4">📷</div>
+          <h3 class="text-xl font-bold text-white mb-2">No photos yet</h3>
+          <p class="text-dark-400 mb-4">Check back soon for new photos!</p>
+        </div>
+      )}
+      
+      <!-- Hidden Empty State for filtering -->
       <div id="empty-state" class="hidden text-center py-16">
         <div class="text-6xl mb-4">📷</div>
         <h3 class="text-xl font-bold text-white mb-2">No photos found</h3>
@@ -259,27 +188,25 @@ const categoryIcons: Record<string, string> = {
   const galleryGrid = document.getElementById('gallery-grid');
   const resetButton = document.getElementById('reset-filter');
 
-  function filterGallery(category: string) {
+  function filterGallery(category) {
     let visibleCount = 0;
     
     galleryItems.forEach((item) => {
-      const itemCategory = (item as HTMLElement).dataset.category;
+      const itemCategory = item.dataset.category;
       const shouldShow = category === 'all' || itemCategory === category;
       
       if (shouldShow) {
-        (item as HTMLElement).style.display = 'block';
+        item.style.display = 'block';
         visibleCount++;
       } else {
-        (item as HTMLElement).style.display = 'none';
+        item.style.display = 'none';
       }
     });
     
-    // Update count
     if (photoCount) {
       photoCount.textContent = visibleCount.toString();
     }
     
-    // Show/hide empty state
     if (emptyState && galleryGrid) {
       if (visibleCount === 0) {
         emptyState.classList.remove('hidden');
@@ -290,22 +217,19 @@ const categoryIcons: Record<string, string> = {
       }
     }
     
-    // Update active button
     filterButtons.forEach((btn) => {
-      const btnCategory = (btn as HTMLElement).dataset.category;
-      (btn as HTMLElement).dataset.active = (btnCategory === category).toString();
+      const btnCategory = btn.dataset.category;
+      btn.dataset.active = (btnCategory === category).toString();
     });
   }
 
-  // Add click handlers
   filterButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
-      const category = (btn as HTMLElement).dataset.category || 'all';
+      const category = btn.dataset.category || 'all';
       filterGallery(category);
     });
   });
 
-  // Reset button
   if (resetButton) {
     resetButton.addEventListener('click', () => {
       filterGallery('all');

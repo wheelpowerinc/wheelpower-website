@@ -1,45 +1,34 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
+import { getServices, getSiteSettings, getImageUrl } from '../lib/directus.js';
 
-// Services data
-const services = [
-  { 
-    icon: '🔧', 
-    title: 'Tire Installation', 
-    description: 'Professional mounting and balancing for all tire sizes. We ensure perfect fit and optimal performance.',
-    href: '/services#tire-installation'
-  },
-  { 
-    icon: '📐', 
-    title: 'Wheel Alignment', 
-    description: 'Precision computerized alignment to extend tire life, improve handling, and ensure safe driving.',
-    href: '/services#wheel-alignment'
-  },
-  { 
-    icon: '🛠️', 
-    title: 'Vulcanizing', 
-    description: 'Expert tire repair services to fix punctures and damage, getting you back on the road quickly.',
-    href: '/services#vulcanizing'
-  },
-  { 
-    icon: '🛢️', 
-    title: 'Oil Change', 
-    description: 'Quality oil changes using premium lubricants to keep your engine running smoothly.',
-    href: '/services#oil-change'
-  },
-  { 
-    icon: '🔍', 
-    title: 'Preventive Maintenance', 
-    description: 'Comprehensive vehicle checkups to prevent problems before they happen and extend vehicle life.',
-    href: '/services#preventive-maintenance'
-  },
-  { 
-    icon: '⚙️', 
-    title: 'Underchassis Repair', 
-    description: 'Complete suspension, steering, and chassis services for a smooth and safe ride.',
-    href: '/services#underchassis'
-  },
+// Fetch data from Directus
+const siteSettings = await getSiteSettings();
+const directusServices = await getServices();
+
+// Fallback site settings
+const settings = siteSettings || {
+  business_name: 'WheelPower Tires and Auto Care Services',
+  tagline: 'Your Trusted Auto Care Partner in Rizal',
+  phone: '+63 9XX XXX XXXX',
+  email: 'info@wheelpowerautoshop.com',
+  address: 'Marilaque Highway, Baras, Rizal, Philippines',
+  business_hours: '8:00 AM - 5:00 PM Daily',
+  facebook_url: 'https://www.facebook.com/WheelPowerTiresAutocare',
+  google_maps_url: 'https://maps.google.com/?q=WheelPower+Auto+Shop+Baras+Rizal',
+};
+
+// Fallback services
+const fallbackServices = [
+  { icon: '🔧', name: 'Tire Installation', short_description: 'Professional mounting and balancing for all tire sizes.' },
+  { icon: '📐', name: 'Wheel Alignment', short_description: 'Precision computerized alignment to extend tire life.' },
+  { icon: '🛠️', name: 'Vulcanizing', short_description: 'Expert tire repair services to get you back on the road.' },
+  { icon: '🛢️', name: 'Oil Change', short_description: 'Quality oil changes using premium lubricants.' },
+  { icon: '🔍', name: 'Preventive Maintenance', short_description: 'Comprehensive vehicle checkups.' },
+  { icon: '⚙️', name: 'Underchassis Repair', short_description: 'Complete suspension and chassis services.' },
 ];
+
+const services = directusServices && directusServices.length > 0 ? directusServices : fallbackServices;
 
 // Tire brands
 const tireBrands = ['Sailun', 'Radar', 'Comforser', 'Thunderer', 'Apollo', 'Toyo', 'Dunlop'];
@@ -54,26 +43,10 @@ const stats = [
 
 // Why choose us
 const whyChooseUs = [
-  {
-    icon: '✓',
-    title: 'Quality Products',
-    description: 'We only carry trusted tire brands known for durability and performance.'
-  },
-  {
-    icon: '✓',
-    title: 'Expert Technicians',
-    description: 'Our skilled team has years of experience in tire and auto care services.'
-  },
-  {
-    icon: '✓',
-    title: 'Fair Pricing',
-    description: 'Competitive prices with no hidden fees. Get value for your money.'
-  },
-  {
-    icon: '✓',
-    title: 'Fast Service',
-    description: 'We respect your time. Most services completed within the hour.'
-  },
+  { icon: '✓', title: 'Quality Products', description: 'We only carry trusted tire brands known for durability and performance.' },
+  { icon: '✓', title: 'Expert Technicians', description: 'Our skilled team has years of experience in tire and auto care services.' },
+  { icon: '✓', title: 'Fair Pricing', description: 'Competitive prices with no hidden fees. Get value for your money.' },
+  { icon: '✓', title: 'Fast Service', description: 'We respect your time. Most services completed within the hour.' },
 ];
 ---
 
@@ -82,9 +55,20 @@ const whyChooseUs = [
   <!-- Hero Section -->
   <section class="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
     <!-- Background -->
-    <div class="absolute inset-0 bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950">
-      <!-- Decorative grid pattern -->
-      <div class="absolute inset-0 opacity-5" style="background-image: radial-gradient(circle at 2px 2px, #f97316 1px, transparent 0); background-size: 40px 40px;"></div>
+    <div class="absolute inset-0">
+      {settings.hero_image ? (
+        <img 
+          src={getImageUrl(settings.hero_image)} 
+          alt="WheelPower Auto Shop"
+          class="w-full h-full object-cover"
+        />
+      ) : (
+        <div class="w-full h-full bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950">
+          <div class="absolute inset-0 opacity-5" style="background-image: radial-gradient(circle at 2px 2px, #f97316 1px, transparent 0); background-size: 40px 40px;"></div>
+        </div>
+      )}
+      <!-- Overlay -->
+      <div class="absolute inset-0 bg-dark-950/70"></div>
     </div>
     
     <!-- Decorative blurs -->
@@ -101,17 +85,16 @@ const whyChooseUs = [
       
       <!-- Main heading -->
       <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight animate-slide-up">
-        <span class="text-white">Quality Tires &</span>
+        <span class="text-white">Wheelpower Auto Shop</span>
         <br />
         <span class="bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent">
           Expert Auto Care
         </span>
       </h1>
       
-      <!-- Subtitle -->
+      <!-- Subtitle - Using tagline from settings -->
       <p class="text-dark-300 text-lg md:text-xl max-w-2xl mx-auto mb-10 animate-slide-up" style="animation-delay: 0.1s;">
-        Your trusted partner for premium tires, professional wheel alignment, 
-        and complete auto care services along Marilaque Highway, Baras, Rizal.
+        {settings.tagline || 'Your trusted partner for premium tires, professional wheel alignment, and complete auto care services along Marilaque Highway, Baras, Rizal.'}
       </p>
       
       <!-- CTA Buttons -->
@@ -157,14 +140,14 @@ const whyChooseUs = [
       
       <!-- Services grid -->
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {services.map((service) => (
-          <a href={service.href} class="card p-6 group cursor-pointer">
-            <div class="text-4xl mb-4">{service.icon}</div>
+        {services.slice(0, 6).map((service) => (
+          <a href={`/services#${service.id || service.name?.toLowerCase().replace(/\s+/g, '-')}`} class="card p-6 group cursor-pointer">
+            <div class="text-4xl mb-4">{service.icon || '🔧'}</div>
             <h3 class="text-xl font-bold text-white mb-2 group-hover:text-primary-400 transition-colors">
-              {service.title}
+              {service.name}
             </h3>
             <p class="text-dark-400 text-sm leading-relaxed">
-              {service.description}
+              {service.short_description}
             </p>
             <div class="mt-4 text-primary-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
               Learn more →
@@ -221,8 +204,11 @@ const whyChooseUs = [
           <p class="section-subtitle">Why Choose Us</p>
           <h2 class="section-title mb-6">Your Trusted Auto Care Partner</h2>
           <p class="text-dark-300 mb-8 leading-relaxed">
-            At WheelPower, we're more than just a tire shop. We're your partners in keeping your vehicle safe and road-ready. 
-            Located along Marilaque Highway in Baras, Rizal, we've built our reputation on quality service and customer satisfaction.
+            {settings.about_text ? (
+              <span set:html={settings.about_text} />
+            ) : (
+              `At ${settings.business_name || 'WheelPower'}, we're more than just a tire shop. We're your partners in keeping your vehicle safe and road-ready. Located along Marilaque Highway in Baras, Rizal, we've built our reputation on quality service and customer satisfaction.`
+            )}
           </p>
           
           <div class="space-y-4">
@@ -246,15 +232,22 @@ const whyChooseUs = [
           </div>
         </div>
         
-        <!-- Right content - Image placeholder -->
+        <!-- Right content - Image -->
         <div class="relative">
           <div class="aspect-square bg-gradient-to-br from-dark-800 to-dark-900 rounded-2xl border border-dark-700/50 flex items-center justify-center overflow-hidden">
-            <!-- This will be replaced with actual shop image -->
-            <div class="text-center p-8">
-              <div class="text-6xl mb-4">🏪</div>
-              <p class="text-dark-400">Shop Photo</p>
-              <p class="text-dark-500 text-sm">(Will be replaced with actual image)</p>
-            </div>
+            {settings.logo ? (
+              <img 
+                src={getImageUrl(settings.logo)} 
+                alt={settings.business_name || 'WheelPower Auto Shop'}
+                class="w-2/3 h-2/3 object-contain"
+              />
+            ) : (
+              <div class="text-center p-8">
+                <div class="text-6xl mb-4">🏪</div>
+                <p class="text-dark-400">Shop Photo</p>
+                <p class="text-dark-500 text-sm">(Upload in admin panel)</p>
+              </div>
+            )}
           </div>
           <!-- Decorative element -->
           <div class="absolute -bottom-4 -right-4 w-24 h-24 bg-primary-500/20 rounded-full blur-2xl"></div>
@@ -273,14 +266,14 @@ const whyChooseUs = [
         Ready to Get Started?
       </h2>
       <p class="text-primary-100 text-lg mb-8 max-w-2xl mx-auto">
-        Book your appointment today or visit us at Marilaque Highway, Baras, Rizal. 
-        We're open daily from 8:00 AM to 5:00 PM.
+        Book your appointment today or visit us at {settings.address || 'Marilaque Highway, Baras, Rizal'}. 
+        We're open {settings.business_hours || '8:00 AM to 5:00 PM daily'}.
       </p>
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
         <a href="/book" class="bg-white text-primary-600 font-bold px-8 py-4 rounded-full hover:shadow-xl hover:shadow-white/20 transition-all transform hover:scale-105">
           📅 Book Appointment
         </a>
-        <a href="tel:+639XXXXXXXXX" class="bg-transparent border-2 border-white text-white font-bold px-8 py-4 rounded-full hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+        <a href={`tel:${settings.phone?.replace(/\s/g, '') || '+639XXXXXXXXX'}`} class="bg-transparent border-2 border-white text-white font-bold px-8 py-4 rounded-full hover:bg-white/10 transition-all flex items-center justify-center gap-2">
           <span>📞</span>
           <span>Call Now</span>
         </a>
@@ -295,14 +288,13 @@ const whyChooseUs = [
         <p class="section-subtitle">Find Us</p>
         <h2 class="section-title">Our Location</h2>
         <p class="text-dark-400 mt-4">
-          Conveniently located along Marilaque Highway, Baras, Rizal
+          {settings.address || 'Conveniently located along Marilaque Highway, Baras, Rizal'}
         </p>
       </div>
       
       <div class="grid lg:grid-cols-3 gap-8">
         <!-- Map -->
         <div class="lg:col-span-2 aspect-video bg-dark-800 rounded-2xl overflow-hidden border border-dark-700/50">
-          <!-- Replace this with actual Google Maps embed -->
           <iframe 
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3860.7692!2d121.2731!3d14.5231!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTTCsDMxJzIzLjIiTiAxMjHCsDE2JzIzLjIiRQ!5e0!3m2!1sen!2sph!4v1234567890"
             width="100%" 
@@ -324,9 +316,7 @@ const whyChooseUs = [
             <div>
               <h4 class="text-primary-400 font-medium mb-2">📍 Address</h4>
               <p class="text-dark-300">
-                Marilaque Highway,<br />
-                Baras, Rizal,<br />
-                Philippines
+                {settings.address || 'Marilaque Highway, Baras, Rizal, Philippines'}
               </p>
             </div>
             
@@ -334,19 +324,19 @@ const whyChooseUs = [
               <h4 class="text-primary-400 font-medium mb-2">🕐 Business Hours</h4>
               <p class="text-dark-300">
                 Monday - Sunday<br />
-                <span class="font-semibold text-white">8:00 AM - 5:00 PM</span>
+                <span class="font-semibold text-white">{settings.business_hours || '8:00 AM - 5:00 PM'}</span>
               </p>
             </div>
             
             <div>
               <h4 class="text-primary-400 font-medium mb-2">📞 Phone</h4>
-              <a href="tel:+639XXXXXXXXX" class="text-dark-300 hover:text-primary-400 transition-colors">
-                +63 9XX XXX XXXX
+              <a href={`tel:${settings.phone?.replace(/\s/g, '') || '+639XXXXXXXXX'}`} class="text-dark-300 hover:text-primary-400 transition-colors">
+                {settings.phone || '+63 9XX XXX XXXX'}
               </a>
             </div>
             
             <a 
-              href="https://maps.google.com/?q=WheelPower+Auto+Shop+Baras+Rizal" 
+              href={settings.google_maps_url || 'https://maps.google.com/?q=WheelPower+Auto+Shop+Baras+Rizal'}
               target="_blank"
               rel="noopener noreferrer"
               class="btn-primary w-full text-center block"

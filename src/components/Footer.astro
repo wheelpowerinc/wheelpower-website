@@ -1,5 +1,19 @@
 ---
 // Footer Component - Appears at the bottom of every page
+import { getSiteSettings, getImageUrl } from '../lib/directus.js';
+
+// Fetch site settings
+const siteSettings = await getSiteSettings();
+
+// Use settings or fallback values
+const settings = siteSettings || {};
+const businessName = settings.business_name || 'WheelPower Tires and Auto Care Services';
+const phone = settings.phone || '+63 9XX XXX XXXX';
+const email = settings.email || 'info@wheelpowerautoshop.com';
+const address = settings.address || 'Marilaque Highway, Baras, Rizal, Philippines';
+const businessHours = settings.business_hours || '8:00 AM - 5:00 PM';
+const facebookUrl = settings.facebook_url || 'https://www.facebook.com/WheelPowerTiresAutocare';
+
 const currentYear = new Date().getFullYear();
 
 const quickLinks = [
@@ -31,9 +45,17 @@ const tireBrands = [
       <!-- Company Info -->
       <div class="lg:col-span-1">
         <a href="/" class="flex items-center gap-2 mb-4">
-          <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center font-bold text-lg">
-            W
-          </div>
+          {settings.logo ? (
+            <img 
+              src={getImageUrl(settings.logo)} 
+              alt={businessName}
+              class="w-10 h-10 object-contain"
+            />
+          ) : (
+            <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center font-bold text-lg">
+              W
+            </div>
+          )}
           <div>
             <div class="font-bold text-lg text-white">WheelPower</div>
             <div class="text-xs text-primary-400 -mt-1">Tires & Auto Care</div>
@@ -82,28 +104,25 @@ const tireBrands = [
         <ul class="space-y-3">
           <li class="flex items-start gap-3 text-sm">
             <span class="text-primary-400 mt-0.5">📍</span>
-            <span class="text-dark-400">
-              Marilaque Highway,<br />
-              Baras, Rizal, Philippines
-            </span>
+            <span class="text-dark-400" set:html={address.replace(/,/g, ',<br />')} />
           </li>
           <li>
-            <a href="tel:+639XXXXXXXXX" class="flex items-center gap-3 text-sm text-dark-400 hover:text-primary-400 transition-colors">
+            <a href={`tel:${phone.replace(/\s/g, '')}`} class="flex items-center gap-3 text-sm text-dark-400 hover:text-primary-400 transition-colors">
               <span class="text-primary-400">📞</span>
-              <span>+63 9XX XXX XXXX</span>
+              <span>{phone}</span>
             </a>
           </li>
           <li>
-            <a href="mailto:info@wheelpowerautoshop.com" class="flex items-center gap-3 text-sm text-dark-400 hover:text-primary-400 transition-colors">
+            <a href={`mailto:${email}`} class="flex items-center gap-3 text-sm text-dark-400 hover:text-primary-400 transition-colors">
               <span class="text-primary-400">✉️</span>
-              <span>info@wheelpowerautoshop.com</span>
+              <span>{email}</span>
             </a>
           </li>
           <li class="flex items-start gap-3 text-sm">
             <span class="text-primary-400 mt-0.5">🕐</span>
             <span class="text-dark-400">
               Open Daily<br />
-              <span class="text-primary-400 font-medium">8:00 AM - 5:00 PM</span>
+              <span class="text-primary-400 font-medium">{businessHours}</span>
             </span>
           </li>
         </ul>
@@ -127,9 +146,9 @@ const tireBrands = [
   <div class="border-t border-dark-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-dark-500">
-        <p>© {currentYear} WheelPower Tires and Auto Care Services. All rights reserved.</p>
+        <p>© {currentYear} {businessName}. All rights reserved.</p>
         <div class="flex items-center gap-4">
-          <a href="https://www.facebook.com/WheelPowerTiresAutocare" target="_blank" rel="noopener noreferrer" class="hover:text-primary-400 transition-colors">
+          <a href={facebookUrl} target="_blank" rel="noopener noreferrer" class="hover:text-primary-400 transition-colors">
             Facebook
           </a>
           <span class="text-dark-700">|</span>

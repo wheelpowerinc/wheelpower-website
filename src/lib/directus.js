@@ -1,7 +1,7 @@
 // Directus API Helper
 // This file connects your website to your Directus backend
 
-const DIRECTUS_URL = 'https://directus-production-2cc1.up.railway.app'; // Replace with your actual URL
+const DIRECTUS_URL = 'https://directus-production-2cc1.up.railway.app';
 
 /**
  * Fetch data from Directus API
@@ -56,6 +56,16 @@ export async function getMags() {
   return await fetchFromDirectus('mags', {
     sort: '-date_created',
     'filter[status][_neq]': 'unavailable'
+  });
+}
+
+/**
+ * Get all gallery items
+ */
+export async function getGallery() {
+  return await fetchFromDirectus('gallery', {
+    sort: 'sort',
+    'filter[status][_eq]': 'published'
   });
 }
 

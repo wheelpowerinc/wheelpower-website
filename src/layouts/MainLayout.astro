@@ -3,6 +3,14 @@
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/global.css';
+import { getSiteSettings, getImageUrl } from '../lib/directus.js';
+
+// Fetch site settings
+const siteSettings = await getSiteSettings();
+const settings = siteSettings || {};
+
+const phone = settings.phone || '+63 9XX XXX XXXX';
+const businessName = settings.business_name || 'WheelPower Tires and Auto Care Services';
 
 interface Props {
   title: string;
@@ -11,10 +19,11 @@ interface Props {
 
 const { 
   title, 
-  description = "WheelPower Tires and Auto Care Services - Your trusted partner for quality tires, wheel alignment, and professional auto care in Baras, Rizal along Marilaque Highway."
+  description = `${businessName} - Your trusted partner for quality tires, wheel alignment, and professional auto care in Baras, Rizal along Marilaque Highway.`
 } = Astro.props;
 
 const siteTitle = `${title} | WheelPower Auto Shop`;
+const faviconUrl = settings.favicon ? getImageUrl(settings.favicon) : '/favicon.svg';
 ---
 
 <!DOCTYPE html>
@@ -26,7 +35,7 @@ const siteTitle = `${title} | WheelPower Auto Shop`;
     
     <!-- SEO Meta Tags -->
     <meta name="keywords" content="tires, auto shop, wheel alignment, vulcanizing, Rizal, Baras, Marilaque Highway, Sailun, Radar, Comforser, tire installation, car maintenance" />
-    <meta name="author" content="WheelPower Tires and Auto Care Services" />
+    <meta name="author" content={businessName} />
     <meta name="robots" content="index, follow" />
     
     <!-- Open Graph / Facebook -->
@@ -37,7 +46,7 @@ const siteTitle = `${title} | WheelPower Auto Shop`;
     <meta property="og:locale" content="en_PH" />
     
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={faviconUrl} />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     
     <!-- Preconnect for performance -->
@@ -57,7 +66,7 @@ const siteTitle = `${title} | WheelPower Auto Shop`;
     
     <!-- Click-to-Call Mobile Button (Fixed) -->
     <a 
-      href="tel:+639XXXXXXXXX" 
+      href={`tel:${phone.replace(/\s/g, '')}`}
       class="fixed bottom-6 right-6 z-40 md:hidden bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-full shadow-lg shadow-green-500/30 hover:shadow-green-500/50 transition-shadow"
       aria-label="Call us"
     >
