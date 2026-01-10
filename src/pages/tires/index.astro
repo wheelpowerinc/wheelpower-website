@@ -1,195 +1,43 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
+import { getTires, getImageUrl, formatPrice } from '../../lib/directus.js';
+
+// Fetch tires from Directus
+const directusTires = await getTires();
 
 // Tire brands we carry
 const brands = ['All', 'Sailun', 'Radar', 'Comforser', 'Thunderer', 'Apollo', 'Toyo', 'Dunlop'];
 
-// Sample tire data - Later this will come from your admin panel
-const tires = [
+// Fallback data in case Directus is unavailable
+const fallbackTires = [
   {
     id: 1,
     name: 'Atrezzo Elite',
-    brand: 'Sailun',
+    brand: 'sailun',
     size: '205/55R16',
     type: 'Passenger',
     price: 3500,
-    originalPrice: null,
+    original_price: null,
     status: 'available',
     quantity: 12,
-    description: 'Premium touring tire with excellent wet and dry performance. Low noise and comfortable ride.',
+    description: 'Premium touring tire with excellent wet and dry performance.',
     features: ['Low Rolling Resistance', 'Long Tread Life', 'Quiet Ride'],
-    image: null,
-  },
-  {
-    id: 2,
-    name: 'Atrezzo ZSR',
-    brand: 'Sailun',
-    size: '225/45R17',
-    type: 'Performance',
-    price: 4200,
-    originalPrice: 4800,
-    status: 'available',
-    quantity: 8,
-    description: 'High-performance tire designed for sports sedans. Superior handling and grip.',
-    features: ['Sport Performance', 'Enhanced Grip', 'Responsive Handling'],
-    image: null,
-  },
-  {
-    id: 3,
-    name: 'Dimax R8+',
-    brand: 'Radar',
-    size: '265/65R17',
-    type: 'SUV',
-    price: 5800,
-    originalPrice: null,
-    status: 'available',
-    quantity: 6,
-    description: 'All-terrain SUV tire built for both on-road comfort and off-road capability.',
-    features: ['All-Terrain', 'Durable Construction', 'SUV Optimized'],
-    image: null,
-  },
-  {
-    id: 4,
-    name: 'RPX800',
-    brand: 'Radar',
-    size: '195/65R15',
-    type: 'Passenger',
-    price: 2800,
-    originalPrice: null,
-    status: 'limited',
-    quantity: 3,
-    description: 'Reliable everyday tire offering good value and dependable performance.',
-    features: ['Value Choice', 'Reliable Performance', 'Even Wear'],
-    image: null,
-  },
-  {
-    id: 5,
-    name: 'CF700',
-    brand: 'Comforser',
-    size: '185/65R15',
-    type: 'Passenger',
-    price: 2400,
-    originalPrice: null,
-    status: 'available',
-    quantity: 15,
-    description: 'Budget-friendly tire without compromising safety. Great for daily commuters.',
-    features: ['Budget Friendly', 'Safe Performance', 'Fuel Efficient'],
-    image: null,
-  },
-  {
-    id: 6,
-    name: 'CF2000',
-    brand: 'Comforser',
-    size: '265/70R16',
-    type: 'SUV/Light Truck',
-    price: 4500,
-    originalPrice: 5000,
-    status: 'available',
-    quantity: 10,
-    description: 'Rugged tire for SUVs and light trucks. Highway and light off-road capable.',
-    features: ['Highway Terrain', 'Light Off-Road', 'Heavy Duty'],
-    image: null,
-  },
-  {
-    id: 7,
-    name: 'Ranger R404 AT',
-    brand: 'Thunderer',
-    size: '245/70R16',
-    type: 'All-Terrain',
-    price: 5200,
-    originalPrice: null,
-    status: 'available',
-    quantity: 7,
-    description: 'Aggressive all-terrain tire for adventurers. Excellent mud and gravel traction.',
-    features: ['All-Terrain', 'Mud Traction', 'Adventure Ready'],
-    image: null,
-  },
-  {
-    id: 8,
-    name: 'Mach IV R302',
-    brand: 'Thunderer',
-    size: '215/45R17',
-    type: 'Performance',
-    price: 3800,
-    originalPrice: null,
-    status: 'out_of_stock',
-    quantity: 0,
-    description: 'Sport performance tire with aggressive looks and precise handling.',
-    features: ['Sport Design', 'Precise Handling', 'High Speed Rated'],
-    image: null,
-  },
-  {
-    id: 9,
-    name: 'Alnac 4G',
-    brand: 'Apollo',
-    size: '195/55R16',
-    type: 'Passenger',
-    price: 3200,
-    originalPrice: null,
-    status: 'available',
-    quantity: 9,
-    description: 'European-engineered tire with excellent wet grip and low noise levels.',
-    features: ['European Quality', 'Wet Grip', 'Low Noise'],
-    image: null,
-  },
-  {
-    id: 10,
-    name: 'Apterra HT2',
-    brand: 'Apollo',
-    size: '235/60R18',
-    type: 'SUV',
-    price: 5500,
-    originalPrice: 6000,
-    status: 'limited',
-    quantity: 2,
-    description: 'Premium highway terrain SUV tire for comfort and long trips.',
-    features: ['Highway Comfort', 'Premium Quality', 'Long Distance'],
-    image: null,
-  },
-  {
-    id: 11,
-    name: 'Proxes CF2',
-    brand: 'Toyo',
-    size: '205/60R16',
-    type: 'Passenger',
-    price: 4800,
-    originalPrice: null,
-    status: 'available',
-    quantity: 5,
-    description: 'Japanese quality tire with advanced comfort technology and durability.',
-    features: ['Japanese Quality', 'Advanced Comfort', 'Durable'],
-    image: null,
-  },
-  {
-    id: 12,
-    name: 'SP Sport LM705',
-    brand: 'Dunlop',
-    size: '215/55R17',
-    type: 'Touring',
-    price: 5200,
-    originalPrice: null,
-    status: 'available',
-    quantity: 6,
-    description: 'Premium touring tire from a legendary brand. Supreme comfort and handling.',
-    features: ['Premium Brand', 'Supreme Comfort', 'Excellent Handling'],
     image: null,
   },
 ];
 
+// Use Directus data if available, otherwise use fallback
+const tires = directusTires && directusTires.length > 0 ? directusTires : fallbackTires;
+
 // Helper function for status badge
-function getStatusBadge(status: string, quantity: number) {
+function getStatusBadge(status, quantity) {
   if (status === 'out_of_stock' || quantity === 0) {
     return { text: 'Out of Stock', class: 'bg-red-500/20 text-red-400 border-red-500/30' };
   }
-  if (status === 'limited' || quantity <= 3) {
+  if (status === 'limited' || (quantity && quantity <= 3)) {
     return { text: `Only ${quantity} left`, class: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' };
   }
   return { text: 'In Stock', class: 'bg-green-500/20 text-green-400 border-green-500/30' };
-}
-
-// Format price
-function formatPrice(price: number) {
-  return '₱' + price.toLocaleString();
 }
 ---
 
@@ -245,20 +93,29 @@ function formatPrice(price: number) {
         {tires.map((tire) => {
           const statusBadge = getStatusBadge(tire.status, tire.quantity);
           const isOutOfStock = tire.status === 'out_of_stock' || tire.quantity === 0;
+          const brandName = typeof tire.brand === 'string' ? tire.brand : 'Other';
           
           return (
             <div 
               class={`tire-card card overflow-hidden group ${isOutOfStock ? 'opacity-60' : ''}`}
-              data-brand={tire.brand.toLowerCase()}
+              data-brand={brandName.toLowerCase()}
             >
               <!-- Image -->
               <div class="aspect-square bg-gradient-to-br from-dark-800 to-dark-900 relative overflow-hidden">
-                <div class="absolute inset-0 flex items-center justify-center">
-                  <div class="text-center">
-                    <div class="text-6xl mb-2">🔘</div>
-                    <p class="text-dark-500 text-xs">{tire.brand}</p>
+                {tire.image ? (
+                  <img 
+                    src={getImageUrl(tire.image)} 
+                    alt={tire.name}
+                    class="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center">
+                      <div class="text-6xl mb-2">🔘</div>
+                      <p class="text-dark-500 text-xs capitalize">{brandName}</p>
+                    </div>
                   </div>
-                </div>
+                )}
                 
                 <!-- Status Badge -->
                 <div class="absolute top-3 left-3">
@@ -268,7 +125,7 @@ function formatPrice(price: number) {
                 </div>
                 
                 <!-- Sale Badge -->
-                {tire.originalPrice && (
+                {tire.original_price && (
                   <div class="absolute top-3 right-3">
                     <span class="px-2 py-1 bg-primary-500 text-white rounded-full text-xs font-bold">
                       SALE
@@ -281,9 +138,13 @@ function formatPrice(price: number) {
               <div class="p-4">
                 <!-- Brand & Type -->
                 <div class="flex items-center gap-2 mb-2">
-                  <span class="text-primary-400 text-sm font-medium">{tire.brand}</span>
-                  <span class="text-dark-600">•</span>
-                  <span class="text-dark-400 text-sm">{tire.type}</span>
+                  <span class="text-primary-400 text-sm font-medium capitalize">{brandName}</span>
+                  {tire.type && (
+                    <>
+                      <span class="text-dark-600">•</span>
+                      <span class="text-dark-400 text-sm">{tire.type}</span>
+                    </>
+                  )}
                 </div>
                 
                 <!-- Name & Size -->
@@ -293,19 +154,21 @@ function formatPrice(price: number) {
                 <p class="text-dark-400 text-sm mb-3">Size: {tire.size}</p>
                 
                 <!-- Features -->
-                <div class="flex flex-wrap gap-1 mb-4">
-                  {tire.features.slice(0, 2).map((feature) => (
-                    <span class="px-2 py-0.5 bg-dark-800 rounded text-xs text-dark-300">
-                      {feature}
-                    </span>
-                  ))}
-                </div>
+                {tire.features && tire.features.length > 0 && (
+                  <div class="flex flex-wrap gap-1 mb-4">
+                    {tire.features.slice(0, 2).map((feature) => (
+                      <span class="px-2 py-0.5 bg-dark-800 rounded text-xs text-dark-300">
+                        {feature}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 
                 <!-- Price -->
                 <div class="flex items-center gap-2 mb-4">
                   <span class="text-xl font-bold text-white">{formatPrice(tire.price)}</span>
-                  {tire.originalPrice && (
-                    <span class="text-dark-500 line-through text-sm">{formatPrice(tire.originalPrice)}</span>
+                  {tire.original_price && (
+                    <span class="text-dark-500 line-through text-sm">{formatPrice(tire.original_price)}</span>
                   )}
                 </div>
                 
@@ -328,7 +191,16 @@ function formatPrice(price: number) {
         })}
       </div>
       
-      <!-- Empty State (hidden by default) -->
+      <!-- Empty State -->
+      {tires.length === 0 && (
+        <div class="text-center py-16">
+          <div class="text-6xl mb-4">🔍</div>
+          <h3 class="text-xl font-bold text-white mb-2">No tires available</h3>
+          <p class="text-dark-400 mb-4">Check back soon for new inventory!</p>
+        </div>
+      )}
+      
+      <!-- Hidden Empty State for filtering -->
       <div id="empty-state" class="hidden text-center py-16">
         <div class="text-6xl mb-4">🔍</div>
         <h3 class="text-xl font-bold text-white mb-2">No tires found</h3>
@@ -395,27 +267,25 @@ function formatPrice(price: number) {
   const tiresGrid = document.getElementById('tires-grid');
   const resetButton = document.getElementById('reset-filter');
 
-  function filterTires(brand: string) {
+  function filterTires(brand) {
     let visibleCount = 0;
     
     tireCards.forEach((card) => {
-      const cardBrand = (card as HTMLElement).dataset.brand;
+      const cardBrand = card.dataset.brand;
       const shouldShow = brand === 'all' || cardBrand === brand;
       
       if (shouldShow) {
-        (card as HTMLElement).style.display = 'block';
+        card.style.display = 'block';
         visibleCount++;
       } else {
-        (card as HTMLElement).style.display = 'none';
+        card.style.display = 'none';
       }
     });
     
-    // Update count
     if (tireCount) {
       tireCount.textContent = visibleCount.toString();
     }
     
-    // Show/hide empty state
     if (emptyState && tiresGrid) {
       if (visibleCount === 0) {
         emptyState.classList.remove('hidden');
@@ -426,29 +296,25 @@ function formatPrice(price: number) {
       }
     }
     
-    // Update active button
     filterButtons.forEach((btn) => {
-      const btnBrand = (btn as HTMLElement).dataset.brand;
-      (btn as HTMLElement).dataset.active = (btnBrand === brand).toString();
+      const btnBrand = btn.dataset.brand;
+      btn.dataset.active = (btnBrand === brand).toString();
     });
   }
 
-  // Add click handlers
   filterButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
-      const brand = (btn as HTMLElement).dataset.brand || 'all';
+      const brand = btn.dataset.brand || 'all';
       filterTires(brand);
     });
   });
 
-  // Reset button
   if (resetButton) {
     resetButton.addEventListener('click', () => {
       filterTires('all');
     });
   }
 
-  // Check URL for brand filter on page load
   const urlParams = new URLSearchParams(window.location.search);
   const brandParam = urlParams.get('brand');
   if (brandParam) {

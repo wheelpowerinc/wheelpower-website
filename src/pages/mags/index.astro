@@ -1,219 +1,45 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
+import { getMags, getImageUrl, formatPrice } from '../../lib/directus.js';
+
+// Fetch mags from Directus
+const directusMags = await getMags();
 
 // Size filter options
 const sizes = ['All', '14"', '15"', '16"', '17"', '18"'];
 
-// Sample mags data - Later this will come from your admin panel
-const mags = [
+// Fallback data in case Directus is unavailable
+const fallbackMags = [
   {
     id: 1,
     name: 'Rota Grid',
     brand: 'Rota',
-    size: '15"',
-    boltPattern: '4x100',
+    size: '15',
+    bolt_pattern: '4x100',
     width: '7J',
     offset: '+38',
     color: 'Flat Black',
     price: 6500,
-    originalPrice: null,
+    original_price: null,
     status: 'available',
     quantity: 8,
-    description: 'Classic mesh design that fits most compact cars. Lightweight and durable construction.',
-    image: null,
-  },
-  {
-    id: 2,
-    name: 'Rota Slipstream',
-    brand: 'Rota',
-    size: '16"',
-    boltPattern: '4x100 / 4x114',
-    width: '7J',
-    offset: '+40',
-    color: 'White',
-    price: 7200,
-    originalPrice: 8000,
-    status: 'available',
-    quantity: 4,
-    description: '6-spoke classic design. Perfect for JDM-style builds. Available in multiple colors.',
-    image: null,
-  },
-  {
-    id: 3,
-    name: 'Rays TE37',
-    brand: 'Rays',
-    size: '17"',
-    boltPattern: '5x114',
-    width: '8J',
-    offset: '+35',
-    color: 'Bronze',
-    price: 28000,
-    originalPrice: null,
-    status: 'limited',
-    quantity: 2,
-    description: 'Legendary Japanese forged wheel. Ultimate in lightweight performance.',
-    image: null,
-  },
-  {
-    id: 4,
-    name: 'Work Emotion CR',
-    brand: 'Work',
-    size: '17"',
-    boltPattern: '5x114',
-    width: '8.5J',
-    offset: '+38',
-    color: 'Matte Black',
-    price: 25000,
-    originalPrice: null,
-    status: 'available',
-    quantity: 4,
-    description: 'Split 5-spoke design with aggressive concave profile. Premium Japanese craftsmanship.',
-    image: null,
-  },
-  {
-    id: 5,
-    name: 'XXR 527',
-    brand: 'XXR',
-    size: '16"',
-    boltPattern: '4x100 / 4x114',
-    width: '8J',
-    offset: '+25',
-    color: 'Chromium Black',
-    price: 5800,
-    originalPrice: 6500,
-    status: 'available',
-    quantity: 12,
-    description: 'Aggressive concave design at an affordable price. Great for stance builds.',
-    image: null,
-  },
-  {
-    id: 6,
-    name: 'XXR 530',
-    brand: 'XXR',
-    size: '15"',
-    boltPattern: '4x100',
-    width: '8J',
-    offset: '+20',
-    color: 'Gold',
-    price: 5200,
-    originalPrice: null,
-    status: 'available',
-    quantity: 6,
-    description: 'Deep dish design for that classic lowered look. Fits most Hondas and Toyotas.',
-    image: null,
-  },
-  {
-    id: 7,
-    name: 'BBS RS',
-    brand: 'BBS',
-    size: '17"',
-    boltPattern: '5x112 / 5x120',
-    width: '8J',
-    offset: '+35',
-    color: 'Silver Polished',
-    price: 35000,
-    originalPrice: null,
-    status: 'limited',
-    quantity: 1,
-    description: 'Timeless 3-piece classic. The original luxury sport wheel since 1970.',
-    image: null,
-  },
-  {
-    id: 8,
-    name: 'Enkei RPF1',
-    brand: 'Enkei',
-    size: '16"',
-    boltPattern: '4x100',
-    width: '7J',
-    offset: '+43',
-    color: 'Silver',
-    price: 12000,
-    originalPrice: null,
-    status: 'out_of_stock',
-    quantity: 0,
-    description: 'Motorsport-proven lightweight wheel. Used in professional racing worldwide.',
-    image: null,
-  },
-  {
-    id: 9,
-    name: 'Watanabe RS',
-    brand: 'Watanabe',
-    size: '14"',
-    boltPattern: '4x114',
-    width: '6J',
-    offset: '+15',
-    color: 'White',
-    price: 18000,
-    originalPrice: null,
-    status: 'available',
-    quantity: 4,
-    description: 'Iconic 8-spoke Japanese classic. Perfect for vintage car restorations.',
-    image: null,
-  },
-  {
-    id: 10,
-    name: 'Lenso RT7',
-    brand: 'Lenso',
-    size: '15"',
-    boltPattern: '4x100',
-    width: '8J',
-    offset: '+25',
-    color: 'Hyper Black',
-    price: 4800,
-    originalPrice: null,
-    status: 'available',
-    quantity: 10,
-    description: 'Budget-friendly option with great looks. Popular choice for daily drivers.',
-    image: null,
-  },
-  {
-    id: 11,
-    name: 'Volk Racing CE28',
-    brand: 'Volk Racing',
-    size: '18"',
-    boltPattern: '5x114',
-    width: '9J',
-    offset: '+45',
-    color: 'Mag Blue',
-    price: 45000,
-    originalPrice: null,
-    status: 'limited',
-    quantity: 2,
-    description: 'Top-tier Japanese forged wheel. Track-tested performance with stunning looks.',
-    image: null,
-  },
-  {
-    id: 12,
-    name: 'Advanti Storm S1',
-    brand: 'Advanti',
-    size: '18"',
-    boltPattern: '5x114',
-    width: '8J',
-    offset: '+40',
-    color: 'Matte Grey',
-    price: 8500,
-    originalPrice: 9500,
-    status: 'available',
-    quantity: 8,
-    description: 'Modern multi-spoke design. Great balance of style and value for SUVs.',
+    description: 'Classic mesh design that fits most compact cars.',
     image: null,
   },
 ];
 
+// Use Directus data if available, otherwise use fallback
+const mags = directusMags && directusMags.length > 0 ? directusMags : fallbackMags;
+
 // Helper function for status badge
-function getStatusBadge(status: string, quantity: number) {
+function getStatusBadge(status, quantity) {
   if (status === 'out_of_stock' || quantity === 0) {
     return { text: 'Out of Stock', class: 'bg-red-500/20 text-red-400 border-red-500/30' };
   }
-  if (status === 'limited' || quantity <= 3) {
+  if (status === 'limited' || (quantity && quantity <= 3)) {
     return { text: `Only ${quantity} left`, class: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' };
   }
   return { text: 'In Stock', class: 'bg-green-500/20 text-green-400 border-green-500/30' };
-}
-
-// Format price
-function formatPrice(price: number) {
-  return '₱' + price.toLocaleString();
 }
 ---
 
@@ -269,20 +95,29 @@ function formatPrice(price: number) {
         {mags.map((mag) => {
           const statusBadge = getStatusBadge(mag.status, mag.quantity);
           const isOutOfStock = mag.status === 'out_of_stock' || mag.quantity === 0;
+          const sizeValue = typeof mag.size === 'string' ? mag.size.replace('"', '') : mag.size;
           
           return (
             <div 
               class={`mag-card card overflow-hidden group ${isOutOfStock ? 'opacity-60' : ''}`}
-              data-size={mag.size.toLowerCase().replace('"', '')}
+              data-size={sizeValue}
             >
               <!-- Image -->
               <div class="aspect-square bg-gradient-to-br from-dark-800 to-dark-900 relative overflow-hidden">
-                <div class="absolute inset-0 flex items-center justify-center">
-                  <div class="text-center">
-                    <div class="text-6xl mb-2">🎡</div>
-                    <p class="text-dark-500 text-xs">{mag.brand}</p>
+                {mag.image ? (
+                  <img 
+                    src={getImageUrl(mag.image)} 
+                    alt={mag.name}
+                    class="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center">
+                      <div class="text-6xl mb-2">🎡</div>
+                      <p class="text-dark-500 text-xs">{mag.brand}</p>
+                    </div>
                   </div>
-                </div>
+                )}
                 
                 <!-- Status Badge -->
                 <div class="absolute top-3 left-3">
@@ -292,7 +127,7 @@ function formatPrice(price: number) {
                 </div>
                 
                 <!-- Sale Badge -->
-                {mag.originalPrice && (
+                {mag.original_price && (
                   <div class="absolute top-3 right-3">
                     <span class="px-2 py-1 bg-primary-500 text-white rounded-full text-xs font-bold">
                       SALE
@@ -306,8 +141,12 @@ function formatPrice(price: number) {
                 <!-- Brand -->
                 <div class="flex items-center gap-2 mb-2">
                   <span class="text-primary-400 text-sm font-medium">{mag.brand}</span>
-                  <span class="text-dark-600">•</span>
-                  <span class="text-dark-400 text-sm">{mag.color}</span>
+                  {mag.color && (
+                    <>
+                      <span class="text-dark-600">•</span>
+                      <span class="text-dark-400 text-sm">{mag.color}</span>
+                    </>
+                  )}
                 </div>
                 
                 <!-- Name -->
@@ -319,27 +158,33 @@ function formatPrice(price: number) {
                 <div class="grid grid-cols-2 gap-x-4 gap-y-1 mb-3 text-sm">
                   <div>
                     <span class="text-dark-500">Size:</span>
-                    <span class="text-dark-300 ml-1">{mag.size}</span>
+                    <span class="text-dark-300 ml-1">{mag.size}"</span>
                   </div>
-                  <div>
-                    <span class="text-dark-500">Width:</span>
-                    <span class="text-dark-300 ml-1">{mag.width}</span>
-                  </div>
-                  <div>
-                    <span class="text-dark-500">PCD:</span>
-                    <span class="text-dark-300 ml-1">{mag.boltPattern}</span>
-                  </div>
-                  <div>
-                    <span class="text-dark-500">Offset:</span>
-                    <span class="text-dark-300 ml-1">{mag.offset}</span>
-                  </div>
+                  {mag.width && (
+                    <div>
+                      <span class="text-dark-500">Width:</span>
+                      <span class="text-dark-300 ml-1">{mag.width}</span>
+                    </div>
+                  )}
+                  {mag.bolt_pattern && (
+                    <div>
+                      <span class="text-dark-500">PCD:</span>
+                      <span class="text-dark-300 ml-1">{mag.bolt_pattern}</span>
+                    </div>
+                  )}
+                  {mag.offset && (
+                    <div>
+                      <span class="text-dark-500">Offset:</span>
+                      <span class="text-dark-300 ml-1">{mag.offset}</span>
+                    </div>
+                  )}
                 </div>
                 
                 <!-- Price -->
                 <div class="flex items-center gap-2 mb-4">
                   <span class="text-xl font-bold text-white">{formatPrice(mag.price)}</span>
-                  {mag.originalPrice && (
-                    <span class="text-dark-500 line-through text-sm">{formatPrice(mag.originalPrice)}</span>
+                  {mag.original_price && (
+                    <span class="text-dark-500 line-through text-sm">{formatPrice(mag.original_price)}</span>
                   )}
                   <span class="text-dark-500 text-xs">/pc</span>
                 </div>
@@ -363,7 +208,16 @@ function formatPrice(price: number) {
         })}
       </div>
       
-      <!-- Empty State (hidden by default) -->
+      <!-- Empty State -->
+      {mags.length === 0 && (
+        <div class="text-center py-16">
+          <div class="text-6xl mb-4">🔍</div>
+          <h3 class="text-xl font-bold text-white mb-2">No mags available</h3>
+          <p class="text-dark-400 mb-4">Check back soon for new inventory!</p>
+        </div>
+      )}
+      
+      <!-- Hidden Empty State for filtering -->
       <div id="empty-state" class="hidden text-center py-16">
         <div class="text-6xl mb-4">🔍</div>
         <h3 class="text-xl font-bold text-white mb-2">No wheels found</h3>
@@ -430,27 +284,25 @@ function formatPrice(price: number) {
   const magsGrid = document.getElementById('mags-grid');
   const resetButton = document.getElementById('reset-filter');
 
-  function filterMags(size: string) {
+  function filterMags(size) {
     let visibleCount = 0;
     
     magCards.forEach((card) => {
-      const cardSize = (card as HTMLElement).dataset.size;
+      const cardSize = card.dataset.size;
       const shouldShow = size === 'all' || cardSize === size;
       
       if (shouldShow) {
-        (card as HTMLElement).style.display = 'block';
+        card.style.display = 'block';
         visibleCount++;
       } else {
-        (card as HTMLElement).style.display = 'none';
+        card.style.display = 'none';
       }
     });
     
-    // Update count
     if (magCount) {
       magCount.textContent = visibleCount.toString();
     }
     
-    // Show/hide empty state
     if (emptyState && magsGrid) {
       if (visibleCount === 0) {
         emptyState.classList.remove('hidden');
@@ -461,22 +313,19 @@ function formatPrice(price: number) {
       }
     }
     
-    // Update active button
     filterButtons.forEach((btn) => {
-      const btnSize = (btn as HTMLElement).dataset.size;
-      (btn as HTMLElement).dataset.active = (btnSize === size).toString();
+      const btnSize = btn.dataset.size;
+      btn.dataset.active = (btnSize === size).toString();
     });
   }
 
-  // Add click handlers
   filterButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
-      const size = (btn as HTMLElement).dataset.size || 'all';
+      const size = btn.dataset.size || 'all';
       filterMags(size);
     });
   });
 
-  // Reset button
   if (resetButton) {
     resetButton.addEventListener('click', () => {
       filterMags('all');

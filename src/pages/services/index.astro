@@ -1,106 +1,70 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
+import { getServices, getImageUrl } from '../../lib/directus.js';
 
-// Services data - Later this will come from your admin panel
-const services = [
+// Fetch services from Directus
+const directusServices = await getServices();
+
+// Fallback data in case Directus is unavailable
+const fallbackServices = [
   {
     id: 'tire-installation',
     icon: '🔧',
-    title: 'Tire Installation',
-    shortDesc: 'Professional mounting and balancing for all tire sizes.',
-    fullDesc: 'Our expert technicians provide professional tire mounting and balancing services for all vehicle types. We use state-of-the-art equipment to ensure your tires are perfectly balanced, providing a smooth ride and extending tire life. Whether you\'re installing new tires or remounting seasonal tires, we\'ve got you covered.',
-    price: 'Starting at ₱300/tire',
+    name: 'Tire Installation',
+    short_description: 'Professional mounting and balancing for all tire sizes.',
+    description: 'Our expert technicians provide professional tire mounting and balancing services for all vehicle types. We use state-of-the-art equipment to ensure your tires are perfectly balanced.',
+    price: 'From ₱300/tire',
     duration: '30-60 minutes',
-    features: [
-      'Professional mounting on any rim size',
-      'Computer-assisted wheel balancing',
-      'Valve stem inspection and replacement',
-      'Tire pressure optimization',
-      'Old tire disposal included',
-    ],
   },
   {
     id: 'wheel-alignment',
     icon: '📐',
-    title: 'Wheel Alignment',
-    shortDesc: 'Precision computerized alignment for better handling.',
-    fullDesc: 'Proper wheel alignment is crucial for tire longevity, fuel efficiency, and safe handling. Our computerized alignment system precisely adjusts your vehicle\'s suspension angles to manufacturer specifications. This service helps prevent uneven tire wear and ensures your vehicle tracks straight.',
-    price: 'Starting at ₱800',
+    name: 'Wheel Alignment',
+    short_description: 'Precision computerized alignment for better handling.',
+    description: 'Proper wheel alignment is crucial for tire longevity, fuel efficiency, and safe handling. Our computerized alignment system precisely adjusts your vehicle\'s suspension angles.',
+    price: 'From ₱800',
     duration: '45-60 minutes',
-    features: [
-      'Computerized 4-wheel alignment',
-      'Camber, caster, and toe adjustment',
-      'Steering wheel centering',
-      'Suspension inspection',
-      'Before/after alignment printout',
-    ],
   },
   {
     id: 'vulcanizing',
     icon: '🛠️',
-    title: 'Vulcanizing',
-    shortDesc: 'Expert tire repair to get you back on the road.',
-    fullDesc: 'Don\'t let a flat tire ruin your day. Our vulcanizing service repairs punctures and small damages to get you back on the road quickly and safely. We assess each tire carefully to ensure repairs meet safety standards.',
-    price: 'Starting at ₱150',
+    name: 'Vulcanizing',
+    short_description: 'Expert tire repair to get you back on the road.',
+    description: 'Don\'t let a flat tire ruin your day. Our vulcanizing service repairs punctures and small damages to get you back on the road quickly and safely.',
+    price: 'From ₱150',
     duration: '15-30 minutes',
-    features: [
-      'Puncture repair',
-      'Patch and plug repairs',
-      'Tire inspection and assessment',
-      'Hot and cold vulcanizing',
-      'Safety guarantee on repairs',
-    ],
   },
   {
     id: 'oil-change',
     icon: '🛢️',
-    title: 'Oil Change',
-    shortDesc: 'Quality oil changes with premium lubricants.',
-    fullDesc: 'Regular oil changes are essential for engine health. We use quality oils and filters to keep your engine running smoothly. Our technicians also perform a basic inspection to catch potential issues early.',
-    price: 'Starting at ₱800',
+    name: 'Oil Change',
+    short_description: 'Quality oil changes with premium lubricants.',
+    description: 'Regular oil changes are essential for engine health. We use quality oils and filters to keep your engine running smoothly.',
+    price: 'From ₱800',
     duration: '20-30 minutes',
-    features: [
-      'Premium engine oil options',
-      'Oil filter replacement',
-      'Fluid level check',
-      'Basic engine inspection',
-      'Oil disposal included',
-    ],
   },
   {
     id: 'preventive-maintenance',
     icon: '🔍',
-    title: 'Preventive Maintenance',
-    shortDesc: 'Comprehensive checkups to keep your vehicle healthy.',
-    fullDesc: 'Prevention is better than cure. Our preventive maintenance service includes a thorough inspection of your vehicle\'s critical systems. We\'ll identify potential issues before they become expensive problems, keeping you safe on the road.',
-    price: 'Starting at ₱1,500',
+    name: 'Preventive Maintenance',
+    short_description: 'Comprehensive checkups to keep your vehicle healthy.',
+    description: 'Prevention is better than cure. Our preventive maintenance service includes a thorough inspection of your vehicle\'s critical systems.',
+    price: 'From ₱1,500',
     duration: '1-2 hours',
-    features: [
-      'Complete vehicle inspection',
-      'Brake system check',
-      'Fluid levels and condition',
-      'Belt and hose inspection',
-      'Battery test',
-      'Detailed report with recommendations',
-    ],
   },
   {
     id: 'underchassis',
     icon: '⚙️',
-    title: 'Underchassis Repair',
-    shortDesc: 'Suspension, steering, and chassis services.',
-    fullDesc: 'The underchassis components are critical for your vehicle\'s safety and comfort. We service suspension systems, steering components, and other chassis parts. Whether you\'re experiencing unusual noises, vibrations, or handling issues, we can diagnose and fix the problem.',
-    price: 'Price varies by repair',
-    duration: 'Varies by service',
-    features: [
-      'Shock absorber replacement',
-      'Suspension bushing service',
-      'Tie rod and ball joint replacement',
-      'Steering rack service',
-      'Complete underchassis inspection',
-    ],
+    name: 'Underchassis Repair',
+    short_description: 'Suspension, steering, and chassis services.',
+    description: 'We service suspension systems, steering components, and other chassis parts to keep your vehicle safe and comfortable.',
+    price: 'Price varies',
+    duration: 'Varies',
   },
 ];
+
+// Use Directus data if available, otherwise use fallback
+const services = directusServices && directusServices.length > 0 ? directusServices : fallbackServices;
 ---
 
 <MainLayout 
@@ -125,54 +89,53 @@ const services = [
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="space-y-16">
         {services.map((service, index) => (
-          <div id={service.id} class="scroll-mt-24">
+          <div id={service.id || `service-${index}`} class="scroll-mt-24">
             <div class={`grid lg:grid-cols-2 gap-8 lg:gap-12 items-center ${index % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}>
               
               <!-- Service Image/Icon -->
               <div class={`${index % 2 === 1 ? 'lg:order-2' : ''}`}>
-                <div class="aspect-video bg-gradient-to-br from-dark-800 to-dark-900 rounded-2xl border border-dark-700/50 flex items-center justify-center">
-                  <div class="text-center">
-                    <div class="text-8xl mb-4">{service.icon}</div>
-                    <p class="text-dark-500 text-sm">(Service photo placeholder)</p>
-                  </div>
+                <div class="aspect-video bg-gradient-to-br from-dark-800 to-dark-900 rounded-2xl border border-dark-700/50 flex items-center justify-center overflow-hidden">
+                  {service.image ? (
+                    <img 
+                      src={getImageUrl(service.image)} 
+                      alt={service.name}
+                      class="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div class="text-center">
+                      <div class="text-8xl mb-4">{service.icon || '🔧'}</div>
+                      <p class="text-dark-500 text-sm">(Service photo)</p>
+                    </div>
+                  )}
                 </div>
               </div>
               
               <!-- Service Info -->
               <div class={`${index % 2 === 1 ? 'lg:order-1' : ''}`}>
                 <div class="inline-flex items-center gap-2 px-3 py-1 bg-primary-500/10 border border-primary-500/30 rounded-full text-primary-400 text-sm font-medium mb-4">
-                  <span>{service.icon}</span>
-                  <span>{service.duration}</span>
+                  <span>{service.icon || '🔧'}</span>
+                  <span>{service.duration || 'Contact for estimate'}</span>
                 </div>
                 
                 <h2 class="text-2xl md:text-3xl font-bold text-white mb-3">
-                  {service.title}
+                  {service.name}
                 </h2>
                 
-                <p class="text-dark-300 mb-6 leading-relaxed">
-                  {service.fullDesc}
+                <p class="text-dark-300 mb-4">
+                  {service.short_description}
                 </p>
                 
-                <!-- Features -->
-                <div class="mb-6">
-                  <h4 class="text-sm font-semibold text-white mb-3">What's Included:</h4>
-                  <ul class="space-y-2">
-                    {service.features.map((feature) => (
-                      <li class="flex items-start gap-2 text-dark-300 text-sm">
-                        <span class="text-primary-400 mt-0.5">✓</span>
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                {service.description && (
+                  <div class="text-dark-400 mb-6 leading-relaxed prose prose-invert prose-sm max-w-none" set:html={service.description} />
+                )}
                 
                 <!-- Price and CTA -->
                 <div class="flex flex-col sm:flex-row sm:items-center gap-4">
                   <div>
                     <p class="text-dark-400 text-sm">Price</p>
-                    <p class="text-xl font-bold text-primary-400">{service.price}</p>
+                    <p class="text-xl font-bold text-primary-400">{service.price || 'Contact for quote'}</p>
                   </div>
-                  <a href={`/book?service=${service.id}`} class="btn-primary text-center">
+                  <a href={`/book?service=${service.id || service.name?.toLowerCase().replace(/\s+/g, '-')}`} class="btn-primary text-center">
                     Book This Service
                   </a>
                 </div>
