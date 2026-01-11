@@ -1,70 +1,15 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import { getServices, getImageUrl } from '../../lib/directus.js';
+import { getServices, getImageUrl, getSiteSettings } from '../../lib/directus.js';
 
-// Fetch services from Directus
+// Fetch services and settings from Directus
 const directusServices = await getServices();
+const siteSettings = await getSiteSettings();
 
-// Fallback data in case Directus is unavailable
-const fallbackServices = [
-  {
-    id: 'tire-installation',
-    icon: '🔧',
-    name: 'Tire Installation',
-    short_description: 'Professional mounting and balancing for all tire sizes.',
-    description: 'Our expert technicians provide professional tire mounting and balancing services for all vehicle types. We use state-of-the-art equipment to ensure your tires are perfectly balanced.',
-    price: 'From ₱300/tire',
-    duration: '30-60 minutes',
-  },
-  {
-    id: 'wheel-alignment',
-    icon: '📐',
-    name: 'Wheel Alignment',
-    short_description: 'Precision computerized alignment for better handling.',
-    description: 'Proper wheel alignment is crucial for tire longevity, fuel efficiency, and safe handling. Our computerized alignment system precisely adjusts your vehicle\'s suspension angles.',
-    price: 'From ₱800',
-    duration: '45-60 minutes',
-  },
-  {
-    id: 'vulcanizing',
-    icon: '🛠️',
-    name: 'Vulcanizing',
-    short_description: 'Expert tire repair to get you back on the road.',
-    description: 'Don\'t let a flat tire ruin your day. Our vulcanizing service repairs punctures and small damages to get you back on the road quickly and safely.',
-    price: 'From ₱150',
-    duration: '15-30 minutes',
-  },
-  {
-    id: 'oil-change',
-    icon: '🛢️',
-    name: 'Oil Change',
-    short_description: 'Quality oil changes with premium lubricants.',
-    description: 'Regular oil changes are essential for engine health. We use quality oils and filters to keep your engine running smoothly.',
-    price: 'From ₱800',
-    duration: '20-30 minutes',
-  },
-  {
-    id: 'preventive-maintenance',
-    icon: '🔍',
-    name: 'Preventive Maintenance',
-    short_description: 'Comprehensive checkups to keep your vehicle healthy.',
-    description: 'Prevention is better than cure. Our preventive maintenance service includes a thorough inspection of your vehicle\'s critical systems.',
-    price: 'From ₱1,500',
-    duration: '1-2 hours',
-  },
-  {
-    id: 'underchassis',
-    icon: '⚙️',
-    name: 'Underchassis Repair',
-    short_description: 'Suspension, steering, and chassis services.',
-    description: 'We service suspension systems, steering components, and other chassis parts to keep your vehicle safe and comfortable.',
-    price: 'Price varies',
-    duration: 'Varies',
-  },
-];
+const phoneNumber = siteSettings?.phone || '+639XXXXXXXXX';
 
-// Use Directus data if available, otherwise use fallback
-const services = directusServices && directusServices.length > 0 ? directusServices : fallbackServices;
+// Use Directus data if available, otherwise show empty
+const services = directusServices || [];
 ---
 
 <MainLayout 
@@ -87,68 +32,83 @@ const services = directusServices && directusServices.length > 0 ? directusServi
   <!-- Services List -->
   <section class="py-16 md:py-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="space-y-16">
-        {services.map((service, index) => (
-          <div id={service.id || `service-${index}`} class="scroll-mt-24">
-            <div class={`grid lg:grid-cols-2 gap-8 lg:gap-12 items-center ${index % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}>
-              
-              <!-- Service Image/Icon -->
-              <div class={`${index % 2 === 1 ? 'lg:order-2' : ''}`}>
-                <div class="aspect-video bg-gradient-to-br from-dark-800 to-dark-900 rounded-2xl border border-dark-700/50 flex items-center justify-center overflow-hidden">
-                  {service.image ? (
-                    <img 
-                      src={getImageUrl(service.image)} 
-                      alt={service.name}
-                      class="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div class="text-center">
-                      <div class="text-8xl mb-4">{service.icon || '🔧'}</div>
-                      <p class="text-dark-500 text-sm">(Service photo)</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              <!-- Service Info -->
-              <div class={`${index % 2 === 1 ? 'lg:order-1' : ''}`}>
-                <div class="inline-flex items-center gap-2 px-3 py-1 bg-primary-500/10 border border-primary-500/30 rounded-full text-primary-400 text-sm font-medium mb-4">
-                  <span>{service.icon || '🔧'}</span>
-                  <span>{service.duration || 'Contact for estimate'}</span>
-                </div>
+      {services.length > 0 ? (
+        <div class="space-y-16">
+          {services.map((service, index) => (
+            <div id={service.id || `service-${index}`} class="scroll-mt-24">
+              <div class={`grid lg:grid-cols-2 gap-8 lg:gap-12 items-center ${index % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}>
                 
-                <h2 class="text-2xl md:text-3xl font-bold text-white mb-3">
-                  {service.name}
-                </h2>
-                
-                <p class="text-dark-300 mb-4">
-                  {service.short_description}
-                </p>
-                
-                {service.description && (
-                  <div class="text-dark-400 mb-6 leading-relaxed prose prose-invert prose-sm max-w-none" set:html={service.description} />
-                )}
-                
-                <!-- Price and CTA -->
-                <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                  <div>
-                    <p class="text-dark-400 text-sm">Price</p>
-                    <p class="text-xl font-bold text-primary-400">{service.price || 'Contact for quote'}</p>
+                <!-- Service Image/Icon -->
+                <div class={`${index % 2 === 1 ? 'lg:order-2' : ''}`}>
+                  <div class="aspect-video bg-gradient-to-br from-dark-800 to-dark-900 rounded-2xl border border-dark-700/50 flex items-center justify-center overflow-hidden">
+                    {service.image ? (
+                      <img 
+                        src={getImageUrl(service.image)} 
+                        alt={service.name}
+                        class="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div class="text-center">
+                        <div class="text-8xl mb-4">{service.icon || '🔧'}</div>
+                      </div>
+                    )}
                   </div>
-                  <a href={`/book?service=${service.id || service.name?.toLowerCase().replace(/\s+/g, '-')}`} class="btn-primary text-center">
-                    Book This Service
-                  </a>
+                </div>
+                
+                <!-- Service Info -->
+                <div class={`${index % 2 === 1 ? 'lg:order-1' : ''}`}>
+                  <div class="inline-flex items-center gap-2 px-3 py-1 bg-primary-500/10 border border-primary-500/30 rounded-full text-primary-400 text-sm font-medium mb-4">
+                    <span>{service.icon || '🔧'}</span>
+                    <span>{service.duration || 'Contact for estimate'}</span>
+                  </div>
+                  
+                  <h2 class="text-2xl md:text-3xl font-bold text-white mb-3">
+                    {service.name}
+                  </h2>
+                  
+                  <p class="text-dark-300 mb-4">
+                    {service.short_description}
+                  </p>
+                  
+                  {service.description && (
+                    <div class="text-dark-400 mb-6 leading-relaxed prose prose-invert prose-sm max-w-none" set:html={service.description} />
+                  )}
+                  
+                  <!-- Price and CTA -->
+                  <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div>
+                      <p class="text-dark-400 text-sm">Price</p>
+                      <p class="text-xl font-bold text-primary-400">{service.price || 'Contact for quote'}</p>
+                    </div>
+                    <a href={`/book?service=${service.id || service.name?.toLowerCase().replace(/\s+/g, '-')}`} class="btn-primary text-center">
+                      Book This Service
+                    </a>
+                  </div>
                 </div>
               </div>
+              
+              <!-- Divider (except for last item) -->
+              {index < services.length - 1 && (
+                <div class="border-t border-dark-800 mt-16"></div>
+              )}
             </div>
-            
-            <!-- Divider (except for last item) -->
-            {index < services.length - 1 && (
-              <div class="border-t border-dark-800 mt-16"></div>
-            )}
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-16">
+          <div class="text-6xl mb-4">🔧</div>
+          <h3 class="text-xl font-bold text-white mb-2">More services available at our shop!</h3>
+          <p class="text-dark-400 mb-6">Contact us to learn about all the services we offer.</p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/contact" class="btn-secondary">
+              Contact Us
+            </a>
+            <a href={`tel:${phoneNumber.replace(/\s/g, '')}`} class="btn-primary">
+              📞 Call Us
+            </a>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   </section>
 
@@ -166,7 +126,7 @@ const services = directusServices && directusServices.length > 0 ? directusServi
         <a href="/contact" class="btn-secondary">
           Contact Us
         </a>
-        <a href="tel:+639XXXXXXXXX" class="btn-primary">
+        <a href={`tel:${phoneNumber.replace(/\s/g, '')}`} class="btn-primary">
           📞 Call Now
         </a>
       </div>
