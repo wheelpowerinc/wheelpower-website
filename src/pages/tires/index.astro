@@ -5,9 +5,6 @@ import { getTires, getImageUrl, formatPrice } from '../../lib/directus.js';
 // Fetch tires from Directus
 const directusTires = await getTires();
 
-// Tire brands we carry
-const brands = ['All', 'Sailun', 'Radar', 'Comforser', 'Thunderer', 'Apollo', 'Toyo', 'Dunlop'];
-
 // Fallback data in case Directus is unavailable
 const fallbackTires = [
   {
@@ -28,6 +25,14 @@ const fallbackTires = [
 
 // Use Directus data if available, otherwise use fallback
 const tires = directusTires && directusTires.length > 0 ? directusTires : fallbackTires;
+
+// Get unique brands from the tires data dynamically
+const uniqueBrands = [...new Set(tires.map(tire => {
+  const brand = typeof tire.brand === 'string' ? tire.brand : 'Other';
+  return brand.charAt(0).toUpperCase() + brand.slice(1).toLowerCase();
+}))].sort();
+
+const brands = ['All', ...uniqueBrands];
 
 // Helper function for status badge
 function getStatusBadge(status, quantity) {
@@ -101,19 +106,17 @@ function getStatusBadge(status, quantity) {
               data-brand={brandName.toLowerCase()}
             >
               <!-- Image -->
-              <div class="aspect-square bg-gradient-to-br from-dark-800 to-dark-900 relative overflow-hidden">
+              <div class="aspect-square bg-gradient-to-br from-dark-800 to-dark-900 relative overflow-hidden flex items-center justify-center">
                 {tire.image ? (
                   <img 
                     src={getImageUrl(tire.image)} 
                     alt={tire.name}
-                    class="w-full h-full object-cover"
+                    class="w-full h-full object-contain p-2"
                   />
                 ) : (
-                  <div class="absolute inset-0 flex items-center justify-center">
-                    <div class="text-center">
-                      <div class="text-6xl mb-2">🔘</div>
-                      <p class="text-dark-500 text-xs capitalize">{brandName}</p>
-                    </div>
+                  <div class="text-center">
+                    <div class="text-6xl mb-2">🔘</div>
+                    <p class="text-dark-500 text-xs capitalize">{brandName}</p>
                   </div>
                 )}
                 
