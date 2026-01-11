@@ -12,28 +12,10 @@ const phoneNumber = siteSettings?.phone || '+639XXXXXXXXX';
 // Size filter options
 const sizes = ['All', '14"', '15"', '16"', '17"', '18"'];
 
-// Fallback data in case Directus is unavailable
-const fallbackMags = [
-  {
-    id: 1,
-    name: 'Rota Grid',
-    brand: 'Rota',
-    size: '15',
-    bolt_pattern: '4x100',
-    width: '7J',
-    offset: '+38',
-    color: 'Flat Black',
-    price: 6500,
-    original_price: null,
-    status: 'available',
-    quantity: 8,
-    description: 'Classic mesh design that fits most compact cars.',
-    image: null,
-  },
-];
+// Fallback data in case Directus is unavailable - removed, showing empty state instead
 
-// Use Directus data if available, otherwise use fallback
-const mags = directusMags && directusMags.length > 0 ? directusMags : fallbackMags;
+// Use Directus data if available, otherwise show empty
+const mags = directusMags || [];
 
 // Helper function for status badge
 function getStatusBadge(status, quantity) {
