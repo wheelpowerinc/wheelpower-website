@@ -8,22 +8,83 @@ import { getSiteSettings, getImageUrl } from '../lib/directus.js';
 // Fetch site settings
 const siteSettings = await getSiteSettings();
 const settings = siteSettings || {};
-
 const phone = settings.phone || '+63 9XX XXX XXXX';
+const email = settings.email || 'info@wheelpowerautoshop.com';
 const businessName = settings.business_name || 'WheelPower Tires and Auto Care Services';
+const address = settings.address || 'Marilaque Highway, Baras, Rizal, Philippines';
+const facebookUrl = settings.facebook_url || 'https://www.facebook.com/WheelPowerTiresAutocare';
 
 interface Props {
   title: string;
   description?: string;
+  image?: string;
+  type?: string;
 }
 
 const { 
   title, 
-  description = `${businessName} - Your trusted partner for quality tires, wheel alignment, and professional auto care in Baras, Rizal along Marilaque Highway.`
+  description = `${businessName} - Your trusted partner for quality tires, wheel alignment, and professional auto care in Baras, Rizal along Marilaque Highway.`,
+  image,
+  type = 'website'
 } = Astro.props;
 
-const siteTitle = `${title} | WheelPower Auto Shop`;
+const siteUrl = 'https://wheelpowerautoshop.com';
+const currentUrl = `${siteUrl}${Astro.url.pathname}`;
+const siteTitle = title === 'Home' ? `${businessName} | Tires & Auto Care in Baras, Rizal` : `${title} | WheelPower Auto Shop`;
 const faviconUrl = settings.site_favicon ? getImageUrl(settings.site_favicon) : '/favicon.svg';
+const ogImage = image || (settings.site_logo ? getImageUrl(settings.site_logo) : `${siteUrl}/og-image.jpg`);
+
+// Local Business Structured Data (JSON-LD)
+const businessSchema = {
+  "@context": "https://schema.org",
+  "@type": "AutoRepair",
+  "name": businessName,
+  "image": ogImage,
+  "url": siteUrl,
+  "telephone": phone,
+  "email": email,
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Marilaque Highway",
+    "addressLocality": "Baras",
+    "addressRegion": "Rizal",
+    "postalCode": "1970",
+    "addressCountry": "PH"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 14.624197,
+    "longitude": 121.256665
+  },
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    "opens": "08:00",
+    "closes": "17:00"
+  },
+  "sameAs": [facebookUrl],
+  "priceRange": "₱₱",
+  "areaServed": {
+    "@type": "GeoCircle",
+    "geoMidpoint": {
+      "@type": "GeoCoordinates",
+      "latitude": 14.624197,
+      "longitude": 121.256665
+    },
+    "geoRadius": "30000"
+  },
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Auto Care Services",
+    "itemListElement": [
+      {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Tire Installation"}},
+      {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Wheel Alignment"}},
+      {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Vulcanizing"}},
+      {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Oil Change"}},
+      {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Preventive Maintenance"}}
+    ]
+  }
+};
 ---
 
 <!DOCTYPE html>
@@ -31,19 +92,37 @@ const faviconUrl = settings.site_favicon ? getImageUrl(settings.site_favicon) : 
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content={description} />
     
-    <!-- SEO Meta Tags -->
-    <meta name="keywords" content="tires, auto shop, wheel alignment, vulcanizing, Rizal, Baras, Marilaque Highway, Sailun, Radar, Comforser, tire installation, car maintenance" />
+    <!-- Primary Meta Tags -->
+    <title>{siteTitle}</title>
+    <meta name="title" content={siteTitle} />
+    <meta name="description" content={description} />
+    <meta name="keywords" content="tire shop Rizal, wheel alignment Baras, vulcanizing Rizal, auto repair Marilaque Highway, tire installation Philippines, Sailun tires, Radar tires, Bridgestone, Dunlop, car maintenance Rizal, WheelPower, gulong.ph partner, mags wheels Rizal" />
     <meta name="author" content={businessName} />
     <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={currentUrl} />
     
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={currentUrl} />
     <meta property="og:title" content={siteTitle} />
     <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
     <meta property="og:site_name" content="WheelPower Auto Shop" />
     <meta property="og:locale" content="en_PH" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={currentUrl} />
+    <meta name="twitter:title" content={siteTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    
+    <!-- Geo Tags for Local SEO -->
+    <meta name="geo.region" content="PH-RIZ" />
+    <meta name="geo.placename" content="Baras, Rizal" />
+    <meta name="geo.position" content="14.624197;121.256665" />
+    <meta name="ICBM" content="14.624197, 121.256665" />
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href={faviconUrl} />
@@ -52,8 +131,10 @@ const faviconUrl = settings.site_favicon ? getImageUrl(settings.site_favicon) : 
     <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://directus-production-2cc1.up.railway.app" />
     
-    <title>{siteTitle}</title>
+    <!-- Structured Data for Local Business -->
+    <script type="application/ld+json" set:html={JSON.stringify(businessSchema)} />
   </head>
   <body class="min-h-screen flex flex-col">
     <Header />
