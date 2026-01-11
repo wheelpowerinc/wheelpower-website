@@ -106,12 +106,19 @@ function getStatusBadge(status, quantity) {
               data-brand={brandName.toLowerCase()}
             >
               <!-- Image -->
-              <div class="aspect-square bg-gradient-to-br from-dark-800 to-dark-900 relative overflow-hidden flex items-center justify-center">
+              <div 
+                class="aspect-square bg-gradient-to-br from-dark-800 to-dark-900 relative overflow-hidden flex items-center justify-center cursor-pointer tire-image-trigger"
+                data-image={tire.image ? getImageUrl(tire.image) : ''}
+                data-name={tire.name}
+                data-brand={brandName}
+                data-size={tire.size}
+                data-price={formatPrice(tire.price)}
+              >
                 {tire.image ? (
                   <img 
                     src={getImageUrl(tire.image)} 
                     alt={tire.name}
-                    class="w-full h-full object-contain p-2"
+                    class="w-full h-full object-contain p-2 hover:scale-105 transition-transform"
                   />
                 ) : (
                   <div class="text-center">
@@ -261,6 +268,20 @@ function getStatusBadge(status, quantity) {
 
 </MainLayout>
 
+<!-- Image Modal -->
+<div id="image-modal" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-4">
+  <button id="modal-close" class="absolute top-4 right-4 text-white text-4xl hover:text-primary-400 transition-colors">&times;</button>
+  <div class="max-w-3xl w-full">
+    <img id="modal-image" src="" alt="" class="w-full max-h-[70vh] object-contain mb-4" />
+    <div id="modal-details" class="bg-dark-900 rounded-lg p-4 text-center">
+      <p class="text-primary-400 text-sm font-medium mb-1" id="modal-brand"></p>
+      <h3 class="text-xl font-bold text-white mb-2" id="modal-name"></h3>
+      <p class="text-dark-400 mb-2" id="modal-size"></p>
+      <p class="text-2xl font-bold text-white" id="modal-price"></p>
+    </div>
+  </div>
+</div>
+
 <!-- Filter Script -->
 <script>
   const filterButtons = document.querySelectorAll('.brand-filter');
@@ -323,4 +344,53 @@ function getStatusBadge(status, quantity) {
   if (brandParam) {
     filterTires(brandParam.toLowerCase());
   }
+
+  // Image Modal
+  const modal = document.getElementById('image-modal');
+  const modalImage = document.getElementById('modal-image');
+  const modalName = document.getElementById('modal-name');
+  const modalBrand = document.getElementById('modal-brand');
+  const modalSize = document.getElementById('modal-size');
+  const modalPrice = document.getElementById('modal-price');
+  const modalClose = document.getElementById('modal-close');
+  const imageTriggers = document.querySelectorAll('.tire-image-trigger');
+
+  imageTriggers.forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      const image = trigger.dataset.image;
+      if (!image) return;
+      
+      modalImage.src = image;
+      modalImage.alt = trigger.dataset.name;
+      modalName.textContent = trigger.dataset.name;
+      modalBrand.textContent = trigger.dataset.brand;
+      modalSize.textContent = 'Size: ' + trigger.dataset.size;
+      modalPrice.textContent = trigger.dataset.price;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  modalClose.addEventListener('click', () => {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+  });
 </script>
