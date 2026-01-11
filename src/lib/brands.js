@@ -13,5 +13,9 @@ export const tireBrands = [
   'MRF',
   'Westlake',
   'Deestone',
-  'Maxxis'
+  'Maxxis',
+  'Yokohama',
+  'Prinx',
+  'Goodyear',
+  'BFGoodrich'
 ];
