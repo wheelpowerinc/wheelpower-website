@@ -9,5 +9,9 @@ export const tireBrands = [
   'Apollo',
   'Toyo',
   'Dunlop',
-  'Bridgestone'
+  'Bridgestone',
+  'MRF',
+  'Westlake',
+  'Deestone',
+  'Maxxis'
 ];
