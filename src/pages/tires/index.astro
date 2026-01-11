@@ -44,9 +44,30 @@ function getStatusBadge(status, quantity) {
     </div>
   </section>
 
-  <!-- Brand Filter -->
+  <!-- Search and Brand Filter -->
   <section class="py-8 border-b border-dark-800 sticky top-16 md:top-20 bg-dark-950/95 backdrop-blur-md z-30">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Search Bar -->
+      <div class="max-w-md mx-auto mb-6">
+        <div class="relative">
+          <input 
+            type="text" 
+            id="tire-search" 
+            placeholder="Search by brand, name, or size (e.g. 205/55R16)..."
+            class="input-field pl-10 pr-10"
+          />
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <button id="clear-search" class="absolute right-3 top-1/2 -translate-y-1/2 text-dark-500 hover:text-white hidden">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Brand Filter -->
       <div class="flex flex-wrap gap-2 justify-center">
         {brands.map((brand) => (
           <button 
@@ -86,6 +107,8 @@ function getStatusBadge(status, quantity) {
             <div 
               class={`tire-card card overflow-hidden group ${isOutOfStock ? 'opacity-60' : ''}`}
               data-brand={brandName.toLowerCase()}
+              data-name={tire.name?.toLowerCase() || ''}
+              data-size={tire.size?.toLowerCase() || ''}
             >
               <!-- Image -->
               <div 
@@ -267,14 +290,31 @@ function getStatusBadge(status, quantity) {
   const tireCount = document.getElementById('tire-count');
   const emptyState = document.getElementById('empty-state');
   const tiresGrid = document.getElementById('tires-grid');
-  const resetButton = document.getElementById('reset-filter');
+  const searchInput = document.getElementById('tire-search');
+  const clearSearchBtn = document.getElementById('clear-search');
 
-  function filterTires(brand) {
+  let currentBrand = 'all';
+  let currentSearch = '';
+
+  function filterTires() {
     let visibleCount = 0;
     
     tireCards.forEach((card) => {
-      const cardBrand = card.dataset.brand;
-      const shouldShow = brand === 'all' || cardBrand === brand;
+      const cardBrand = card.dataset.brand || '';
+      const cardName = card.dataset.name || '';
+      const cardSize = card.dataset.size || '';
+      
+      // Check brand filter
+      const matchesBrand = currentBrand === 'all' || cardBrand === currentBrand;
+      
+      // Check search filter
+      const searchTerm = currentSearch.toLowerCase().trim();
+      const matchesSearch = searchTerm === '' || 
+        cardBrand.includes(searchTerm) || 
+        cardName.includes(searchTerm) || 
+        cardSize.includes(searchTerm);
+      
+      const shouldShow = matchesBrand && matchesSearch;
       
       if (shouldShow) {
         card.style.display = 'block';
@@ -289,7 +329,7 @@ function getStatusBadge(status, quantity) {
     }
     
     if (emptyState && tiresGrid) {
-      if (visibleCount === 0) {
+      if (visibleCount === 0 && tireCards.length > 0) {
         emptyState.classList.remove('hidden');
         tiresGrid.classList.add('hidden');
       } else {
@@ -298,29 +338,55 @@ function getStatusBadge(status, quantity) {
       }
     }
     
+    // Update active brand button
     filterButtons.forEach((btn) => {
       const btnBrand = btn.dataset.brand;
-      btn.dataset.active = (btnBrand === brand).toString();
+      btn.dataset.active = (btnBrand === currentBrand).toString();
     });
+
+    // Show/hide clear button
+    if (clearSearchBtn) {
+      if (currentSearch) {
+        clearSearchBtn.classList.remove('hidden');
+      } else {
+        clearSearchBtn.classList.add('hidden');
+      }
+    }
   }
 
+  // Brand filter click
   filterButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
-      const brand = btn.dataset.brand || 'all';
-      filterTires(brand);
+      currentBrand = btn.dataset.brand || 'all';
+      filterTires();
     });
   });
 
-  if (resetButton) {
-    resetButton.addEventListener('click', () => {
-      filterTires('all');
+  // Search input
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      currentSearch = e.target.value;
+      filterTires();
     });
   }
 
+  // Clear search button
+  if (clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', () => {
+      if (searchInput) {
+        searchInput.value = '';
+        currentSearch = '';
+        filterTires();
+      }
+    });
+  }
+
+  // Check URL params for pre-selected brand
   const urlParams = new URLSearchParams(window.location.search);
   const brandParam = urlParams.get('brand');
   if (brandParam) {
-    filterTires(brandParam.toLowerCase());
+    currentBrand = brandParam.toLowerCase();
+    filterTires();
   }
 
   // Image Modal
