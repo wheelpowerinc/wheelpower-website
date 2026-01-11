@@ -28,8 +28,9 @@ const timeSlots = [
   '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM', '4:00 PM'
 ];
 
-// WEB3FORMS ACCESS KEY - Replace with your actual key
+// Configuration - Replace with your actual values
 const WEB3FORMS_KEY = '528eb7cc-b0d5-4bbe-98f5-9d274734f8ba';
+const DIRECTUS_URL = 'https://directus-production-2cc1.up.railway.app';
 ---
 
 <MainLayout 
@@ -54,22 +55,11 @@ const WEB3FORMS_KEY = '528eb7cc-b0d5-4bbe-98f5-9d274734f8ba';
       
       <!-- Form Card -->
       <div class="card p-6 md:p-8">
-        <form id="booking-form" action="https://api.web3forms.com/submit" method="POST" class="space-y-8">
+        <form id="booking-form" class="space-y-8">
           
-          <!-- Web3Forms Access Key (Hidden) -->
-          <input type="hidden" name="access_key" value={WEB3FORMS_KEY} />
-          
-          <!-- Form Subject (Hidden) -->
-          <input type="hidden" name="subject" value="🚗 New Booking Request - WheelPower Auto Shop" />
-          
-          <!-- From Name (Hidden) -->
-          <input type="hidden" name="from_name" value="WheelPower Website" />
-          
-          <!-- Redirect after submission (Hidden) -->
-          <input type="hidden" name="redirect" value="https://wheelpowerautoshop.com/book/success" />
-          
-          <!-- Honeypot Spam Protection (Hidden) -->
-          <input type="checkbox" name="botcheck" class="hidden" style="display: none;" />
+          <!-- Hidden config values for JavaScript -->
+          <input type="hidden" id="web3forms-key" value={WEB3FORMS_KEY} />
+          <input type="hidden" id="directus-url" value={DIRECTUS_URL} />
           
           <!-- Step 1: Select Service -->
           <div class="space-y-4">
@@ -261,6 +251,51 @@ const WEB3FORMS_KEY = '528eb7cc-b0d5-4bbe-98f5-9d274734f8ba';
             </p>
           </div>
         </form>
+
+        <!-- Success Message (Hidden by default) -->
+        <div id="success-message" class="hidden text-center py-8">
+          <div class="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-white mb-2">Booking Request Sent!</h3>
+          <p class="text-dark-300 mb-6 max-w-md mx-auto">
+            Thank you! We've received your appointment request. We'll contact you within a few hours to confirm.
+          </p>
+          <div class="space-y-3">
+            <p class="text-dark-400 text-sm">
+              <span class="text-white font-medium">What's next?</span><br />
+              We'll call or text you to confirm your appointment time.
+            </p>
+          </div>
+          <div class="mt-8">
+            <a href="/" class="btn-secondary">
+              Back to Home
+            </a>
+          </div>
+        </div>
+
+        <!-- Error Message (Hidden by default) -->
+        <div id="error-message" class="hidden text-center py-8">
+          <div class="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold text-white mb-2">Something went wrong</h3>
+          <p class="text-dark-300 mb-6">
+            Please try again or contact us directly.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button id="try-again-btn" class="btn-secondary">
+              Try Again
+            </button>
+            <a href={`tel:${phone.replace(/\s/g, '')}`} class="btn-primary">
+              📞 Call Us
+            </a>
+          </div>
+        </div>
       </div>
 
       <!-- Contact Alternative -->
@@ -312,6 +347,12 @@ const WEB3FORMS_KEY = '528eb7cc-b0d5-4bbe-98f5-9d274734f8ba';
   const submitBtn = document.getElementById('submit-btn');
   const submitText = document.getElementById('submit-text');
   const submitLoading = document.getElementById('submit-loading');
+  const successMessage = document.getElementById('success-message');
+  const errorMessage = document.getElementById('error-message');
+  const tryAgainBtn = document.getElementById('try-again-btn');
+  
+  const web3formsKey = document.getElementById('web3forms-key')?.value;
+  const directusUrl = document.getElementById('directus-url')?.value;
 
   // Check URL params for pre-selected service
   const urlParams = new URLSearchParams(window.location.search);
@@ -327,13 +368,113 @@ const WEB3FORMS_KEY = '528eb7cc-b0d5-4bbe-98f5-9d274734f8ba';
     });
   }
 
-  // Form submission - show loading state
-  if (form) {
-    form.addEventListener('submit', () => {
-      if (submitBtn && submitText && submitLoading) {
+  // Show loading state
+  function setLoading(isLoading) {
+    if (submitBtn && submitText && submitLoading) {
+      if (isLoading) {
         submitBtn.setAttribute('disabled', 'true');
         submitText.classList.add('hidden');
         submitLoading.classList.remove('hidden');
+      } else {
+        submitBtn.removeAttribute('disabled');
+        submitText.classList.remove('hidden');
+        submitLoading.classList.add('hidden');
+      }
+    }
+  }
+
+  // Show success
+  function showSuccess() {
+    if (form && successMessage) {
+      form.classList.add('hidden');
+      successMessage.classList.remove('hidden');
+      window.scrollTo({ top: 200, behavior: 'smooth' });
+    }
+  }
+
+  // Show error
+  function showError() {
+    if (form && errorMessage) {
+      form.classList.add('hidden');
+      errorMessage.classList.remove('hidden');
+      window.scrollTo({ top: 200, behavior: 'smooth' });
+    }
+  }
+
+  // Try again
+  if (tryAgainBtn) {
+    tryAgainBtn.addEventListener('click', () => {
+      if (form && errorMessage) {
+        errorMessage.classList.add('hidden');
+        form.classList.remove('hidden');
+        setLoading(false);
+      }
+    });
+  }
+
+  // Form submission
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      setLoading(true);
+
+      // Get form data
+      const formData = new FormData(form);
+      const data = {
+        service: formData.get('service'),
+        preferred_date: formData.get('preferred_date'),
+        preferred_time: formData.get('preferred_time'),
+        customer_name: formData.get('customer_name'),
+        phone: formData.get('phone'),
+        email: formData.get('email') || '',
+        vehicle: formData.get('vehicle') || '',
+        notes: formData.get('notes') || '',
+        status: 'pending'
+      };
+
+      try {
+        // 1. Save to Directus database
+        const directusResponse = await fetch(`${directusUrl}/items/bookings`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!directusResponse.ok) {
+          console.error('Directus error:', await directusResponse.text());
+        }
+
+        // 2. Send email via Web3Forms
+        const emailData = new FormData();
+        emailData.append('access_key', web3formsKey);
+        emailData.append('subject', '🚗 New Booking Request - WheelPower Auto Shop');
+        emailData.append('from_name', 'WheelPower Website');
+        emailData.append('service', data.service);
+        emailData.append('preferred_date', data.preferred_date);
+        emailData.append('preferred_time', data.preferred_time);
+        emailData.append('customer_name', data.customer_name);
+        emailData.append('phone', data.phone);
+        emailData.append('email', data.email);
+        emailData.append('vehicle', data.vehicle);
+        emailData.append('notes', data.notes);
+
+        const emailResponse = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          body: emailData
+        });
+
+        if (!emailResponse.ok) {
+          console.error('Email error:', await emailResponse.text());
+        }
+
+        // Show success even if one fails (as long as we tried)
+        showSuccess();
+
+      } catch (error) {
+        console.error('Submission error:', error);
+        showError();
       }
     });
   }
