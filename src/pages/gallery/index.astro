@@ -1,22 +1,19 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import { getGallery, getImageUrl } from '../../lib/directus.js';
+import { getGallery, getImageUrl, getSiteSettings } from '../../lib/directus.js';
 
 // Fetch gallery from Directus
 const directusGallery = await getGallery();
 
+// Fetch site settings
+const siteSettings = await getSiteSettings();
+const facebook = siteSettings?.facebook_url || 'https://www.facebook.com/WheelPowerTiresAutocare';
+
 // Gallery categories
 const categories = ['All', 'Shop', 'Services', 'Tires', 'Mags', 'Customers'];
 
-// Fallback data in case Directus is unavailable or empty
-const fallbackGallery = [
-  { id: 1, category: 'shop', title: 'WheelPower Shop Front', description: 'Our shop along Marilaque Highway', image: null },
-  { id: 2, category: 'services', title: 'Wheel Alignment', description: 'Precision alignment service', image: null },
-  { id: 3, category: 'tires', title: 'Tire Display', description: 'Wide selection of brands', image: null },
-];
-
-// Use Directus data if available, otherwise use fallback
-const galleryItems = directusGallery && directusGallery.length > 0 ? directusGallery : fallbackGallery;
+// Use Directus data if available, otherwise show empty
+const galleryItems = directusGallery || [];
 
 // Placeholder icons for different categories
 const categoryIcons = {
@@ -80,8 +77,12 @@ const categoryIcons = {
           
           return (
             <div 
-              class="gallery-item group cursor-pointer"
+              class="gallery-item group cursor-pointer gallery-image-trigger"
               data-category={categoryValue}
+              data-image={item.image ? getImageUrl(item.image) : ''}
+              data-title={item.title || ''}
+              data-description={item.description || ''}
+              data-category-label={categoryValue}
             >
               <div class="card overflow-hidden">
                 <!-- Image -->
@@ -139,8 +140,11 @@ const categoryIcons = {
       {galleryItems.length === 0 && (
         <div class="text-center py-16">
           <div class="text-6xl mb-4">📷</div>
-          <h3 class="text-xl font-bold text-white mb-2">No photos yet</h3>
-          <p class="text-dark-400 mb-4">Check back soon for new photos!</p>
+          <h3 class="text-xl font-bold text-white mb-2">Photos coming soon!</h3>
+          <p class="text-dark-400 mb-4">Check back soon or visit our Facebook page for more photos.</p>
+          <a href={facebook} target="_blank" rel="noopener noreferrer" class="btn-primary">
+            Visit Our Facebook
+          </a>
         </div>
       )}
       
@@ -170,7 +174,7 @@ const categoryIcons = {
         <a href="/book" class="btn-primary">
           📅 Book Appointment
         </a>
-        <a href="https://www.facebook.com/WheelPowerTiresAutocare" target="_blank" rel="noopener noreferrer" class="btn-secondary">
+        <a href={facebook} target="_blank" rel="noopener noreferrer" class="btn-secondary">
           Follow Us on Facebook
         </a>
       </div>
@@ -178,6 +182,19 @@ const categoryIcons = {
   </section>
 
 </MainLayout>
+
+<!-- Image Modal -->
+<div id="image-modal" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-4">
+  <button id="modal-close" class="absolute top-4 right-4 text-white text-4xl hover:text-primary-400 transition-colors">&times;</button>
+  <div class="max-w-4xl w-full">
+    <img id="modal-image" src="" alt="" class="w-full max-h-[70vh] object-contain mb-4" />
+    <div id="modal-details" class="bg-dark-900 rounded-lg p-4 text-center">
+      <span id="modal-category" class="inline-block px-3 py-1 bg-primary-500/20 text-primary-400 rounded-full text-xs font-medium capitalize mb-2"></span>
+      <h3 class="text-xl font-bold text-white mb-2" id="modal-title"></h3>
+      <p class="text-dark-400" id="modal-description"></p>
+    </div>
+  </div>
+</div>
 
 <!-- Filter Script -->
 <script>
@@ -235,4 +252,59 @@ const categoryIcons = {
       filterGallery('all');
     });
   }
+
+  // Image Modal
+  const modal = document.getElementById('image-modal');
+  const modalImage = document.getElementById('modal-image');
+  const modalTitle = document.getElementById('modal-title');
+  const modalDescription = document.getElementById('modal-description');
+  const modalCategory = document.getElementById('modal-category');
+  const modalClose = document.getElementById('modal-close');
+  const imageTriggers = document.querySelectorAll('.gallery-image-trigger');
+
+  imageTriggers.forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      const image = trigger.dataset.image;
+      if (!image) return;
+      
+      modalImage.src = image;
+      modalImage.alt = trigger.dataset.title || '';
+      modalTitle.textContent = trigger.dataset.title || '';
+      modalDescription.textContent = trigger.dataset.description || '';
+      modalCategory.textContent = trigger.dataset.categoryLabel || '';
+      
+      // Hide description if empty
+      if (trigger.dataset.description) {
+        modalDescription.classList.remove('hidden');
+      } else {
+        modalDescription.classList.add('hidden');
+      }
+      
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  modalClose.addEventListener('click', () => {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+  });
 </script>
