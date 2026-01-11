@@ -44,7 +44,7 @@ export async function getServices() {
  */
 export async function getTires() {
   return await fetchFromDirectus('tires', {
-    sort: '-date_created',
+    sort: 'sort',
     'filter[status][_neq]': 'unavailable'
   });
 }
@@ -54,7 +54,7 @@ export async function getTires() {
  */
 export async function getMags() {
   return await fetchFromDirectus('mags', {
-    sort: '-date_created',
+    sort: 'sort',
     'filter[status][_neq]': 'unavailable'
   });
 }
