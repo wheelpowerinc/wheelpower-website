@@ -45,10 +45,10 @@ function getStatusBadge(status, quantity) {
   </section>
 
   <!-- Search and Brand Filter -->
-  <section class="py-8 border-b border-dark-800 sticky top-16 md:top-20 bg-dark-950/95 backdrop-blur-md z-30">
+  <section class="py-4 md:py-8 border-b border-dark-800 sticky top-16 md:top-20 bg-dark-950/95 backdrop-blur-md z-30">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Search Bar -->
-      <div class="max-w-md mx-auto mb-6">
+      <div class="max-w-md mx-auto mb-4">
         <div class="relative">
           <input 
             type="text" 
@@ -67,17 +67,19 @@ function getStatusBadge(status, quantity) {
         </div>
       </div>
       
-      <!-- Brand Filter -->
-      <div class="flex flex-wrap gap-2 justify-center">
-        {brands.map((brand) => (
-          <button 
-            class="brand-filter px-4 py-2 rounded-full text-sm font-medium border transition-all data-[active=true]:bg-primary-500 data-[active=true]:border-primary-500 data-[active=true]:text-white border-dark-600 text-dark-300 hover:border-primary-500/50 hover:text-white"
-            data-brand={brand.toLowerCase()}
-            data-active={brand === 'All' ? 'true' : 'false'}
-          >
-            {brand}
-          </button>
-        ))}
+      <!-- Brand Filter - Horizontal scroll on mobile -->
+      <div class="overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+        <div class="flex gap-2 md:flex-wrap md:justify-center min-w-max md:min-w-0">
+          {brands.map((brand) => (
+            <button 
+              class="brand-filter px-4 py-2 rounded-full text-sm font-medium border transition-all whitespace-nowrap data-[active=true]:bg-primary-500 data-[active=true]:border-primary-500 data-[active=true]:text-white border-dark-600 text-dark-300 hover:border-primary-500/50 hover:text-white"
+              data-brand={brand.toLowerCase()}
+              data-active={brand === 'All' ? 'true' : 'false'}
+            >
+              {brand}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   </section>

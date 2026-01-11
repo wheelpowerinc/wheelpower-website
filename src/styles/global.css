@@ -62,6 +62,16 @@ body {
   background-color: var(--color-dark-500);
 }
 
+/* Hide scrollbar utility (for horizontal scroll filters) */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Reusable component styles */
 .btn-primary {
   background: linear-gradient(to right, var(--color-primary-500), var(--color-primary-600));
