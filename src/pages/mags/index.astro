@@ -203,18 +203,9 @@ function getStatusBadge(status, quantity) {
         })}
       </div>
       
-      <!-- Empty State -->
-      {mags.length === 0 && (
-        <div class="text-center py-16">
-          <div class="text-6xl mb-4">🔍</div>
-          <h3 class="text-xl font-bold text-white mb-2">No mags available</h3>
-          <p class="text-dark-400 mb-4">Check back soon for new inventory!</p>
-        </div>
-      )}
-      
-      <!-- Hidden Empty State for filtering -->
-      <div id="empty-state" class="hidden text-center py-16">
-        <div class="text-6xl mb-4">🎡</div>
+      <!-- More Designs CTA - Always visible -->
+      <div id="more-designs-cta" class="text-center py-12 mt-8 border-t border-dark-800">
+        <div class="text-5xl mb-4">🎡</div>
         <h3 class="text-xl font-bold text-white mb-2">More designs available at our shop!</h3>
         <p class="text-dark-400 mb-6">We have more sizes and styles in stock. Visit us or get in touch to see our full collection.</p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
