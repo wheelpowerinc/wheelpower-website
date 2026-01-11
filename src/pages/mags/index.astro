@@ -1,9 +1,13 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import { getMags, getImageUrl, formatPrice } from '../../lib/directus.js';
+import { getMags, getImageUrl, formatPrice, getSiteSettings } from '../../lib/directus.js';
 
 // Fetch mags from Directus
 const directusMags = await getMags();
+
+// Fetch site settings for phone number
+const siteSettings = await getSiteSettings();
+const phoneNumber = siteSettings?.phone || '+639XXXXXXXXX';
 
 // Size filter options
 const sizes = ['All', '14"', '15"', '16"', '17"', '18"'];
@@ -228,12 +232,17 @@ function getStatusBadge(status, quantity) {
       
       <!-- Hidden Empty State for filtering -->
       <div id="empty-state" class="hidden text-center py-16">
-        <div class="text-6xl mb-4">🔍</div>
-        <h3 class="text-xl font-bold text-white mb-2">No wheels found</h3>
-        <p class="text-dark-400 mb-4">Try selecting a different size filter.</p>
-        <button id="reset-filter" class="btn-secondary">
-          Show All Wheels
-        </button>
+        <div class="text-6xl mb-4">🎡</div>
+        <h3 class="text-xl font-bold text-white mb-2">More designs available at our shop!</h3>
+        <p class="text-dark-400 mb-6">We have more sizes and styles in stock. Visit us or get in touch to see our full collection.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/contact" class="btn-secondary">
+            Contact Us
+          </a>
+          <a href={`tel:${phoneNumber}`} class="btn-primary">
+            📞 Call Us
+          </a>
+        </div>
       </div>
     </div>
   </section>
@@ -275,7 +284,7 @@ function getStatusBadge(status, quantity) {
         <a href="/contact" class="btn-secondary">
           Send Inquiry
         </a>
-        <a href="tel:+639XXXXXXXXX" class="btn-primary">
+        <a href={`tel:${phoneNumber}`} class="btn-primary">
           📞 Call Us
         </a>
       </div>

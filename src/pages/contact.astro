@@ -1,5 +1,24 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
+import { getSiteSettings } from '../lib/directus.js';
+
+// Fetch site settings from Directus
+const siteSettings = await getSiteSettings();
+const settings = siteSettings || {};
+
+const phone = settings.phone || '+63 9XX XXX XXXX';
+const email = settings.email || 'info@wheelpowerautoshop.com';
+const address = settings.address || 'Marilaque Highway, Baras, Rizal, Philippines';
+const facebook = settings.facebook_url || 'https://www.facebook.com/WheelPowerTiresAutocare';
+const mapsUrl = settings.google_maps_url || 'https://maps.google.com/?q=WheelPower+Auto+Shop+Baras+Rizal';
+const businessHours = settings.business_hours || '8:00 AM - 5:00 PM';
+
+// Extract messenger from facebook URL
+const facebookUsername = facebook.split('/').pop();
+const messenger = `https://m.me/${facebookUsername}`;
+
+// Configuration
+const WEB3FORMS_KEY = '528eb7cc-b0d5-4bbe-98f5-9d274734f8ba';
 ---
 
 <MainLayout 
@@ -35,13 +54,9 @@ import MainLayout from '../layouts/MainLayout.astro';
               </div>
               <div>
                 <h3 class="font-semibold text-white mb-1">Shop Address</h3>
-                <p class="text-dark-300">
-                  Marilaque Highway,<br />
-                  Baras, Rizal,<br />
-                  Philippines
-                </p>
+                <p class="text-dark-300" set:html={address.replace(/,/g, ',<br />')}></p>
                 <a 
-                  href="https://maps.google.com/?q=WheelPower+Auto+Shop+Baras+Rizal" 
+                  href={mapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   class="inline-flex items-center gap-1 text-primary-400 hover:text-primary-300 text-sm mt-2 transition-colors"
@@ -62,10 +77,10 @@ import MainLayout from '../layouts/MainLayout.astro';
               <div>
                 <h3 class="font-semibold text-white mb-1">Phone Number</h3>
                 <a 
-                  href="tel:+639XXXXXXXXX" 
+                  href={`tel:${phone.replace(/\s/g, '')}`}
                   class="text-dark-300 hover:text-primary-400 transition-colors text-lg"
                 >
-                  +63 9XX XXX XXXX
+                  {phone}
                 </a>
                 <p class="text-dark-500 text-sm mt-1">Call or text anytime</p>
               </div>
@@ -79,10 +94,10 @@ import MainLayout from '../layouts/MainLayout.astro';
               <div>
                 <h3 class="font-semibold text-white mb-1">Email Address</h3>
                 <a 
-                  href="mailto:info@wheelpowerautoshop.com" 
+                  href={`mailto:${email}`}
                   class="text-dark-300 hover:text-primary-400 transition-colors"
                 >
-                  info@wheelpowerautoshop.com
+                  {email}
                 </a>
                 <p class="text-dark-500 text-sm mt-1">We reply within 24 hours</p>
               </div>
@@ -96,7 +111,7 @@ import MainLayout from '../layouts/MainLayout.astro';
               <div>
                 <h3 class="font-semibold text-white mb-1">Business Hours</h3>
                 <p class="text-dark-300">Monday - Sunday</p>
-                <p class="text-primary-400 font-semibold">8:00 AM - 5:00 PM</p>
+                <p class="text-primary-400 font-semibold">{businessHours}</p>
                 <p class="text-dark-500 text-sm mt-1">Open 7 days a week</p>
               </div>
             </div>
@@ -109,12 +124,12 @@ import MainLayout from '../layouts/MainLayout.astro';
               <div>
                 <h3 class="font-semibold text-white mb-1">Social Media</h3>
                 <a 
-                  href="https://www.facebook.com/WheelPowerTiresAutocare" 
+                  href={facebook}
                   target="_blank"
                   rel="noopener noreferrer"
                   class="text-dark-300 hover:text-primary-400 transition-colors"
                 >
-                  facebook.com/WheelPowerTiresAutocare
+                  Facebook Page
                 </a>
                 <p class="text-dark-500 text-sm mt-1">Follow us for updates and promos</p>
               </div>
@@ -123,10 +138,10 @@ import MainLayout from '../layouts/MainLayout.astro';
 
           <!-- Quick Actions -->
           <div class="mt-10 flex flex-wrap gap-4">
-            <a href="tel:+639XXXXXXXXX" class="btn-primary">
+            <a href={`tel:${phone.replace(/\s/g, '')}`} class="btn-primary">
               📞 Call Now
             </a>
-            <a href="https://m.me/WheelPowerTiresAutocare" target="_blank" rel="noopener noreferrer" class="btn-secondary">
+            <a href={messenger} target="_blank" rel="noopener noreferrer" class="btn-secondary">
               💬 Message Us
             </a>
           </div>
@@ -136,6 +151,9 @@ import MainLayout from '../layouts/MainLayout.astro';
         <div>
           <div class="card p-6 md:p-8">
             <h2 class="text-2xl font-bold text-white mb-6">Send Us a Message</h2>
+            
+            <!-- Hidden config values for JavaScript -->
+            <input type="hidden" id="web3forms-key" value={WEB3FORMS_KEY} />
             
             <form id="contact-form" class="space-y-5">
               <div>
@@ -233,7 +251,29 @@ import MainLayout from '../layouts/MainLayout.astro';
                 </svg>
               </div>
               <h3 class="text-xl font-bold text-white mb-2">Message Sent!</h3>
-              <p class="text-dark-300">Thank you for reaching out. We'll get back to you soon!</p>
+              <p class="text-dark-300 mb-6">Thank you for reaching out. We'll get back to you soon!</p>
+              <button id="send-another-btn" class="btn-secondary">
+                Send Another Message
+              </button>
+            </div>
+
+            <!-- Error Message (Hidden by default) -->
+            <div id="error-message" class="hidden text-center py-8">
+              <div class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold text-white mb-2">Something went wrong</h3>
+              <p class="text-dark-300 mb-6">Please try again or contact us directly.</p>
+              <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button id="try-again-btn" class="btn-secondary">
+                  Try Again
+                </button>
+                <a href={`tel:${phone.replace(/\s/g, '')}`} class="btn-primary">
+                  📞 Call Us
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -250,9 +290,8 @@ import MainLayout from '../layouts/MainLayout.astro';
       </div>
       
       <div class="aspect-[21/9] bg-dark-800 rounded-2xl overflow-hidden border border-dark-700/50">
-        <!-- Replace with actual Google Maps embed -->
         <iframe 
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3860.7692!2d121.2731!3d14.5231!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTTCsDMxJzIzLjIiTiAxMjHCsDE2JzIzLjIiRQ!5e0!3m2!1sen!2sph!4v1234567890"
+          src={mapsUrl.includes('embed') ? mapsUrl : `https://maps.google.com/maps?q=${encodeURIComponent(address)}&output=embed`}
           width="100%" 
           height="100%" 
           style="border:0;" 
@@ -266,7 +305,7 @@ import MainLayout from '../layouts/MainLayout.astro';
       
       <div class="text-center mt-6">
         <a 
-          href="https://maps.google.com/?q=WheelPower+Auto+Shop+Baras+Rizal" 
+          href={mapsUrl}
           target="_blank"
           rel="noopener noreferrer"
           class="btn-secondary inline-flex items-center gap-2"
@@ -284,43 +323,114 @@ import MainLayout from '../layouts/MainLayout.astro';
 
 <!-- Form Handling Script -->
 <script>
-  const form = document.getElementById('contact-form') as HTMLFormElement;
+  const form = document.getElementById('contact-form');
   const submitBtn = document.getElementById('submit-btn');
   const submitText = document.getElementById('submit-text');
   const submitLoading = document.getElementById('submit-loading');
   const successMessage = document.getElementById('success-message');
+  const errorMessage = document.getElementById('error-message');
+  const tryAgainBtn = document.getElementById('try-again-btn');
+  const sendAnotherBtn = document.getElementById('send-another-btn');
 
-  if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      // Show loading state
-      if (submitBtn && submitText && submitLoading) {
+  const web3formsKey = document.getElementById('web3forms-key')?.value;
+
+  // Show loading state
+  function setLoading(isLoading) {
+    if (submitBtn && submitText && submitLoading) {
+      if (isLoading) {
         submitBtn.setAttribute('disabled', 'true');
         submitText.classList.add('hidden');
         submitLoading.classList.remove('hidden');
+      } else {
+        submitBtn.removeAttribute('disabled');
+        submitText.classList.remove('hidden');
+        submitLoading.classList.add('hidden');
       }
+    }
+  }
+
+  // Show success
+  function showSuccess() {
+    if (form && successMessage) {
+      form.classList.add('hidden');
+      successMessage.classList.remove('hidden');
+      if (errorMessage) errorMessage.classList.add('hidden');
+    }
+  }
+
+  // Show error
+  function showError() {
+    if (form && errorMessage) {
+      form.classList.add('hidden');
+      errorMessage.classList.remove('hidden');
+      if (successMessage) successMessage.classList.add('hidden');
+    }
+  }
+
+  // Reset form
+  function resetForm() {
+    if (form && successMessage && errorMessage) {
+      form.reset();
+      form.classList.remove('hidden');
+      successMessage.classList.add('hidden');
+      errorMessage.classList.add('hidden');
+      setLoading(false);
+    }
+  }
+
+  // Try again button
+  if (tryAgainBtn) {
+    tryAgainBtn.addEventListener('click', resetForm);
+  }
+
+  // Send another message button
+  if (sendAnotherBtn) {
+    sendAnotherBtn.addEventListener('click', resetForm);
+  }
+
+  // Form submission
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      setLoading(true);
 
       // Get form data
       const formData = new FormData(form);
       const data = {
         name: formData.get('name'),
         phone: formData.get('phone'),
-        email: formData.get('email'),
+        email: formData.get('email') || '',
         subject: formData.get('subject'),
-        message: formData.get('message'),
+        message: formData.get('message')
       };
 
-      // Simulate API call (replace with actual API endpoint later)
-      console.log('Contact form data:', data);
-      
-      // Simulate delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      try {
+        // Send email via Web3Forms
+        const emailData = new FormData();
+        emailData.append('access_key', web3formsKey);
+        emailData.append('subject', '📩 New Contact Message - WheelPower Auto Shop');
+        emailData.append('from_name', 'WheelPower Website');
+        emailData.append('name', data.name);
+        emailData.append('phone', data.phone);
+        emailData.append('email', data.email);
+        emailData.append('inquiry_subject', data.subject);
+        emailData.append('message', data.message);
 
-      // Show success message
-      form.classList.add('hidden');
-      if (successMessage) {
-        successMessage.classList.remove('hidden');
+        const emailResponse = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          body: emailData
+        });
+
+        if (!emailResponse.ok) {
+          throw new Error('Email sending failed');
+        }
+
+        // Show success
+        showSuccess();
+
+      } catch (error) {
+        console.error('Submission error:', error);
+        showError();
       }
     });
   }
