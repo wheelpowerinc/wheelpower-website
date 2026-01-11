@@ -1,6 +1,7 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
 import { getTires, getImageUrl, formatPrice, getSiteSettings } from '../../lib/directus.js';
+import { tireBrands as allBrands } from '../../lib/brands.js';
 
 // Fetch tires from Directus
 const directusTires = await getTires();
@@ -12,13 +13,8 @@ const phoneNumber = siteSettings?.phone || '+639XXXXXXXXX';
 // Use Directus data if available, otherwise show empty
 const tires = directusTires || [];
 
-// Get unique brands from the tires data dynamically
-const uniqueBrands = [...new Set(tires.map(tire => {
-  const brand = typeof tire.brand === 'string' ? tire.brand : 'Other';
-  return brand.charAt(0).toUpperCase() + brand.slice(1).toLowerCase();
-}))].sort();
-
-const brands = ['All', ...uniqueBrands];
+// Use brands from config file, with "All" at the start
+const brands = ['All', ...allBrands];
 
 // Helper function for status badge
 function getStatusBadge(status, quantity) {

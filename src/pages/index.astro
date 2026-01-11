@@ -1,6 +1,7 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
 import { getServices, getSiteSettings, getImageUrl } from '../lib/directus.js';
+import { tireBrands } from '../lib/brands.js';
 
 // Fetch data from Directus
 const siteSettings = await getSiteSettings();
@@ -18,20 +19,8 @@ const settings = siteSettings || {
   google_maps_url: 'https://maps.google.com/?q=WheelPower+Auto+Shop+Baras+Rizal',
 };
 
-// Fallback services
-const fallbackServices = [
-  { icon: '🔧', name: 'Tire Installation', short_description: 'Professional mounting and balancing for all tire sizes.' },
-  { icon: '📐', name: 'Wheel Alignment', short_description: 'Precision computerized alignment to extend tire life.' },
-  { icon: '🛠️', name: 'Vulcanizing', short_description: 'Expert tire repair services to get you back on the road.' },
-  { icon: '🛢️', name: 'Oil Change', short_description: 'Quality oil changes using premium lubricants.' },
-  { icon: '🔍', name: 'Preventive Maintenance', short_description: 'Comprehensive vehicle checkups.' },
-  { icon: '⚙️', name: 'Underchassis Repair', short_description: 'Complete suspension and chassis services.' },
-];
-
-const services = directusServices && directusServices.length > 0 ? directusServices : fallbackServices;
-
-// Tire brands
-const tireBrands = ['Sailun', 'Radar', 'Comforser', 'Thunderer', 'Apollo', 'Toyo', 'Dunlop'];
+// Use Directus services or empty array
+const services = directusServices || [];
 
 // Stats
 const stats = [
@@ -139,29 +128,38 @@ const whyChooseUs = [
       </div>
       
       <!-- Services grid -->
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {services.slice(0, 6).map((service) => (
-          <a href={`/services#${service.id || service.name?.toLowerCase().replace(/\s+/g, '-')}`} class="card p-6 group cursor-pointer">
-            <div class="text-4xl mb-4">{service.icon || '🔧'}</div>
-            <h3 class="text-xl font-bold text-white mb-2 group-hover:text-primary-400 transition-colors">
-              {service.name}
-            </h3>
-            <p class="text-dark-400 text-sm leading-relaxed">
-              {service.short_description}
-            </p>
-            <div class="mt-4 text-primary-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-              Learn more →
-            </div>
-          </a>
-        ))}
-      </div>
+      {services.length > 0 ? (
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {services.slice(0, 6).map((service) => (
+            <a href={`/services#${service.id || service.name?.toLowerCase().replace(/\s+/g, '-')}`} class="card p-6 group cursor-pointer">
+              <div class="text-4xl mb-4">{service.icon || '🔧'}</div>
+              <h3 class="text-xl font-bold text-white mb-2 group-hover:text-primary-400 transition-colors">
+                {service.name}
+              </h3>
+              <p class="text-dark-400 text-sm leading-relaxed">
+                {service.short_description}
+              </p>
+              <div class="mt-4 text-primary-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                Learn more →
+              </div>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-12">
+          <p class="text-dark-400 mb-4">Services coming soon!</p>
+          <a href="/contact" class="btn-primary">Contact Us for Services</a>
+        </div>
+      )}
       
       <!-- View all link -->
-      <div class="text-center mt-10">
-        <a href="/services" class="text-primary-400 font-semibold hover:text-primary-300 transition-colors">
-          View All Services →
-        </a>
-      </div>
+      {services.length > 0 && (
+        <div class="text-center mt-10">
+          <a href="/services" class="text-primary-400 font-semibold hover:text-primary-300 transition-colors">
+            View All Services →
+          </a>
+        </div>
+      )}
     </div>
   </section>
 
