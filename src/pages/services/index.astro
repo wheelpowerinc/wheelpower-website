@@ -40,15 +40,22 @@ const services = directusServices || [];
                 
                 <!-- Service Image/Icon -->
                 <div class={`${index % 2 === 1 ? 'lg:order-2' : ''}`}>
-                  <div class="aspect-video bg-gradient-to-br from-dark-800 to-dark-900 rounded-2xl border border-dark-700/50 flex items-center justify-center overflow-hidden">
+                  <div 
+                    class="aspect-video bg-gradient-to-br from-dark-800 to-dark-900 rounded-2xl border border-dark-700/50 flex items-center justify-center overflow-hidden cursor-pointer service-image-trigger group"
+                    data-image={service.image ? getImageUrl(service.image) : ''}
+                    data-name={service.name || ''}
+                    data-description={service.short_description || ''}
+                    data-price={service.price || 'Contact for quote'}
+                    data-icon={service.icon || '🔧'}
+                  >
                     {service.image ? (
                       <img 
                         src={getImageUrl(service.image)} 
                         alt={service.name}
-                        class="w-full h-full object-cover"
+                        class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
-                      <div class="text-center">
+                      <div class="text-center group-hover:scale-110 transition-transform duration-300">
                         <div class="text-8xl mb-4">{service.icon || '🔧'}</div>
                       </div>
                     )}
@@ -134,3 +141,79 @@ const services = directusServices || [];
   </section>
 
 </MainLayout>
+
+<!-- Image Modal -->
+<div id="image-modal" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-4">
+  <button id="modal-close" class="absolute top-4 right-4 text-white text-4xl hover:text-primary-400 transition-colors">&times;</button>
+  <div class="max-w-3xl w-full">
+    <div id="modal-image-container" class="bg-gradient-to-br from-dark-800 to-dark-900 rounded-2xl flex items-center justify-center mb-4 overflow-hidden">
+      <img id="modal-image" src="" alt="" class="w-full max-h-[60vh] object-contain" />
+      <div id="modal-icon" class="text-9xl hidden"></div>
+    </div>
+    <div id="modal-details" class="bg-dark-900 rounded-lg p-5 text-center">
+      <h3 class="text-2xl font-bold text-white mb-2" id="modal-name"></h3>
+      <p class="text-dark-400 mb-4" id="modal-description"></p>
+      <p class="text-xl font-bold text-primary-400" id="modal-price"></p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Script -->
+<script>
+  const modal = document.getElementById('image-modal');
+  const modalImage = document.getElementById('modal-image');
+  const modalIcon = document.getElementById('modal-icon');
+  const modalName = document.getElementById('modal-name');
+  const modalDescription = document.getElementById('modal-description');
+  const modalPrice = document.getElementById('modal-price');
+  const modalClose = document.getElementById('modal-close');
+  const imageTriggers = document.querySelectorAll('.service-image-trigger');
+
+  imageTriggers.forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      const image = trigger.dataset.image;
+      const icon = trigger.dataset.icon;
+      
+      if (image) {
+        modalImage.src = image;
+        modalImage.alt = trigger.dataset.name || '';
+        modalImage.classList.remove('hidden');
+        modalIcon.classList.add('hidden');
+      } else {
+        modalImage.classList.add('hidden');
+        modalIcon.textContent = icon || '🔧';
+        modalIcon.classList.remove('hidden');
+      }
+      
+      modalName.textContent = trigger.dataset.name || '';
+      modalDescription.textContent = trigger.dataset.description || '';
+      modalPrice.textContent = trigger.dataset.price || 'Contact for quote';
+      
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  modalClose.addEventListener('click', () => {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+  });
+</script>
