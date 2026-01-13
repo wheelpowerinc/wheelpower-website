@@ -17,5 +17,6 @@ export const tireBrands = [
   'Yokohama',
   'Prinx',
   'Goodyear',
-  'BFGoodrich'
+  'BFGoodrich',
+  'Arivo'
 ];
