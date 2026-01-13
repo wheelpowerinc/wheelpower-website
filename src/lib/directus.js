@@ -40,12 +40,26 @@ export async function getServices() {
 }
 
 /**
- * Get all tires
+ * Get all tires - sorted by sale items first, then by rim size
  */
 export async function getTires() {
-  return await fetchFromDirectus('tires', {
-    sort: 'sort',
+  const tires = await fetchFromDirectus('tires', {
     'filter[status][_neq]': 'unavailable'
+  });
+  
+  if (!tires) return null;
+  
+  // Sort: items on sale first (has original_price), then by rim_size
+  return tires.sort((a, b) => {
+    // Sale items first
+    const aOnSale = a.original_price ? 1 : 0;
+    const bOnSale = b.original_price ? 1 : 0;
+    if (bOnSale !== aOnSale) return bOnSale - aOnSale;
+    
+    // Then by rim size (ascending)
+    const aRim = parseInt(a.rim_size) || 99;
+    const bRim = parseInt(b.rim_size) || 99;
+    return aRim - bRim;
   });
 }
 

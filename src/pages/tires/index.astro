@@ -16,6 +16,9 @@ const tires = directusTires || [];
 // Use brands from config file, with "All" at the start
 const brands = ['All', ...allBrands];
 
+// Rim sizes for dropdown
+const rimSizes = ['All', '13', '14', '15', '16', '17', '18', '19'];
+
 // Helper function for status badge
 function getStatusBadge(status, quantity) {
   if (status === 'out_of_stock' || quantity === 0) {
@@ -47,9 +50,10 @@ function getStatusBadge(status, quantity) {
   <!-- Search and Brand Filter -->
   <section class="py-4 md:py-8 border-b border-dark-800 sticky top-16 md:top-20 bg-dark-950/95 backdrop-blur-md z-30">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Search Bar -->
-      <div class="max-w-md mx-auto mb-4">
-        <div class="relative">
+      <!-- Search Bar and Rim Size Dropdown -->
+      <div class="flex gap-3 max-w-xl mx-auto mb-4">
+        <!-- Search -->
+        <div class="relative flex-1">
           <input 
             type="text" 
             id="tire-search" 
@@ -63,6 +67,21 @@ function getStatusBadge(status, quantity) {
           </button>
           <svg id="search-icon" class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        
+        <!-- Rim Size Dropdown -->
+        <div class="relative">
+          <select 
+            id="rim-size-filter" 
+            class="input-field appearance-none pr-10 min-w-[120px] cursor-pointer"
+          >
+            {rimSizes.map((size) => (
+              <option value={size.toLowerCase()}>{size === 'All' ? 'All Rims' : `${size}"`}</option>
+            ))}
+          </select>
+          <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </div>
       </div>
@@ -111,6 +130,7 @@ function getStatusBadge(status, quantity) {
               data-brand={brandName.toLowerCase()}
               data-name={tire.name?.toLowerCase() || ''}
               data-size={tire.size?.toLowerCase() || ''}
+              data-rim={tire.rim_size || ''}
             >
               <!-- Image -->
               <div 
@@ -295,9 +315,11 @@ function getStatusBadge(status, quantity) {
   const searchInput = document.getElementById('tire-search');
   const clearSearchBtn = document.getElementById('clear-search');
   const searchIcon = document.getElementById('search-icon');
+  const rimSizeFilter = document.getElementById('rim-size-filter');
 
   let currentBrand = 'all';
   let currentSearch = '';
+  let currentRimSize = 'all';
 
   function filterTires() {
     let visibleCount = 0;
@@ -306,9 +328,13 @@ function getStatusBadge(status, quantity) {
       const cardBrand = card.dataset.brand || '';
       const cardName = card.dataset.name || '';
       const cardSize = card.dataset.size || '';
+      const cardRim = card.dataset.rim || '';
       
       // Check brand filter
       const matchesBrand = currentBrand === 'all' || cardBrand === currentBrand;
+      
+      // Check rim size filter
+      const matchesRim = currentRimSize === 'all' || cardRim === currentRimSize;
       
       // Check search filter
       const searchTerm = currentSearch.toLowerCase().trim();
@@ -317,7 +343,7 @@ function getStatusBadge(status, quantity) {
         cardName.includes(searchTerm) || 
         cardSize.includes(searchTerm);
       
-      const shouldShow = matchesBrand && matchesSearch;
+      const shouldShow = matchesBrand && matchesSearch && matchesRim;
       
       if (shouldShow) {
         card.style.display = 'block';
@@ -386,13 +412,30 @@ function getStatusBadge(status, quantity) {
     });
   }
 
-  // Check URL params for pre-selected brand
+  // Rim size dropdown
+  if (rimSizeFilter) {
+    rimSizeFilter.addEventListener('change', (e) => {
+      currentRimSize = e.target.value;
+      filterTires();
+    });
+  }
+
+  // Check URL params for pre-selected brand or rim size
   const urlParams = new URLSearchParams(window.location.search);
   const brandParam = urlParams.get('brand');
+  const rimParam = urlParams.get('rim');
+  
   if (brandParam) {
     currentBrand = brandParam.toLowerCase();
-    filterTires();
   }
+  if (rimParam) {
+    currentRimSize = rimParam;
+    if (rimSizeFilter) {
+      rimSizeFilter.value = rimParam;
+    }
+  }
+  
+  filterTires();
 
   // Image Modal
   const modal = document.getElementById('image-modal');
