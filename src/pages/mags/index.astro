@@ -275,7 +275,10 @@ function getStatusBadge(status, quantity) {
       <p class="text-primary-400 text-sm font-medium mb-1" id="modal-brand"></p>
       <h3 class="text-xl font-bold text-white mb-2" id="modal-name"></h3>
       <div id="modal-specs" class="flex flex-wrap justify-center gap-x-4 gap-y-1 text-dark-400 text-sm mb-2"></div>
-      <p class="text-2xl font-bold text-white" id="modal-price"></p>
+      <p class="text-2xl font-bold text-white mb-4" id="modal-price"></p>
+      <a id="modal-action-btn" href="/book" class="inline-block px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors">
+        Inquire / Buy
+      </a>
     </div>
   </div>
 </div>
@@ -345,27 +348,43 @@ function getStatusBadge(status, quantity) {
   const modalSpecs = document.getElementById('modal-specs');
   const modalPrice = document.getElementById('modal-price');
   const modalClose = document.getElementById('modal-close');
+  const modalActionBtn = document.getElementById('modal-action-btn');
   const imageTriggers = document.querySelectorAll('.mag-image-trigger');
 
   imageTriggers.forEach((trigger) => {
     trigger.addEventListener('click', () => {
       const image = trigger.dataset.image;
       if (!image) return;
-      
+
+      const name = trigger.dataset.name;
+      const brand = trigger.dataset.brand;
+      const color = trigger.dataset.color;
+      const size = trigger.dataset.size;
+      const width = trigger.dataset.width;
+      const bolt = trigger.dataset.bolt;
+      const offset = trigger.dataset.offset;
+      const price = trigger.dataset.price;
+
       modalImage.src = image;
-      modalImage.alt = trigger.dataset.name;
-      modalName.textContent = trigger.dataset.name;
-      modalBrand.textContent = trigger.dataset.brand + (trigger.dataset.color ? ' • ' + trigger.dataset.color : '');
-      
+      modalImage.alt = name;
+      modalName.textContent = name;
+      modalBrand.textContent = brand + (color ? ' • ' + color : '');
+
       // Build specs
       let specs = [];
-      if (trigger.dataset.size) specs.push('Size: ' + trigger.dataset.size + '"');
-      if (trigger.dataset.width) specs.push('Width: ' + trigger.dataset.width);
-      if (trigger.dataset.bolt) specs.push('PCD: ' + trigger.dataset.bolt);
-      if (trigger.dataset.offset) specs.push('Offset: ' + trigger.dataset.offset);
+      if (size) specs.push('Size: ' + size + '"');
+      if (width) specs.push('Width: ' + width);
+      if (bolt) specs.push('PCD: ' + bolt);
+      if (offset) specs.push('Offset: ' + offset);
       modalSpecs.innerHTML = specs.map(s => `<span>${s}</span>`).join('');
-      
-      modalPrice.textContent = trigger.dataset.price + ' /pc';
+
+      modalPrice.textContent = price + ' /pc';
+
+      // Build booking URL with pre-filled notes
+      const specsText = specs.join(', ');
+      const notes = `Inquiry for: ${name}\nBrand: ${brand}${color ? ' (' + color + ')' : ''}\nSpecs: ${specsText}\nPrice: ${price} /pc`;
+      modalActionBtn.href = `/book?service=other&notes=${encodeURIComponent(notes)}`;
+
       modal.classList.remove('hidden');
       modal.classList.add('flex');
       document.body.style.overflow = 'hidden';

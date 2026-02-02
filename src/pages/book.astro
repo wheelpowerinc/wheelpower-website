@@ -354,18 +354,30 @@ const DIRECTUS_URL = 'https://directus-production-2cc1.up.railway.app';
   const web3formsKey = document.getElementById('web3forms-key')?.value;
   const directusUrl = document.getElementById('directus-url')?.value;
 
-  // Check URL params for pre-selected service
+  // Check URL params for pre-selected service and notes
   const urlParams = new URLSearchParams(window.location.search);
   const preSelectedService = urlParams.get('service');
-  
+  const preFilledNotes = urlParams.get('notes');
+
   if (preSelectedService) {
     const serviceInputs = document.querySelectorAll('input[name="service"]');
     serviceInputs.forEach((input) => {
       const inputValue = input.value.toLowerCase().replace(/\s+/g, '-');
-      if (inputValue.includes(preSelectedService) || preSelectedService.includes(inputValue)) {
+      // Match "other" to "Other / General Inquiry" option
+      if (preSelectedService === 'other' && inputValue.includes('other')) {
+        input.checked = true;
+      } else if (inputValue.includes(preSelectedService) || preSelectedService.includes(inputValue)) {
         input.checked = true;
       }
     });
+  }
+
+  // Pre-fill notes field if provided
+  if (preFilledNotes) {
+    const notesField = document.querySelector('textarea[name="notes"]');
+    if (notesField) {
+      notesField.value = preFilledNotes;
+    }
   }
 
   // Show loading state
