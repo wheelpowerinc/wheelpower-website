@@ -88,7 +88,7 @@ const services = directusServices || [];
                       <p class="text-dark-400 text-sm">Price</p>
                       <p class="text-xl font-bold text-primary-400">{service.price || 'Contact for quote'}</p>
                     </div>
-                    <a href={`/book?service=${service.id || service.name?.toLowerCase().replace(/\s+/g, '-')}`} class="btn-primary text-center">
+                    <a href={`/book?service=${encodeURIComponent(service.name)}&notes=${encodeURIComponent(`Service: ${service.name}\nPrice: ${service.price || 'Contact for quote'}`)}`} class="btn-primary text-center">
                       Book This Service
                     </a>
                   </div>

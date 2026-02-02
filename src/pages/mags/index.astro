@@ -190,8 +190,8 @@ function getStatusBadge(status, quantity) {
                     Out of Stock
                   </button>
                 ) : (
-                  <a 
-                    href={`/book?product=mags&item=${mag.id}`}
+                  <a
+                    href={`/book?service=other&notes=${encodeURIComponent(`Inquiry for: ${mag.name}\nBrand: ${mag.brand}\nSize: ${mag.size}"\nPrice: ${formatPrice(mag.price)} /pc`)}`}
                     class="block w-full py-2.5 rounded-lg bg-primary-500 hover:bg-primary-600 text-white font-medium text-center transition-colors"
                   >
                     Inquire / Buy

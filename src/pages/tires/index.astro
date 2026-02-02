@@ -225,8 +225,8 @@ function getStatusBadge(status, quantity) {
                     Out of Stock
                   </button>
                 ) : (
-                  <a 
-                    href={`/book?product=tire&item=${tire.id}`}
+                  <a
+                    href={`/book?service=other&notes=${encodeURIComponent(`Inquiry for: ${tire.name}\nBrand: ${brandName}\nSize: ${tire.size}\nPrice: ${formatPrice(tire.price)}`)}`}
                     class="block w-full py-2.5 rounded-lg bg-primary-500 hover:bg-primary-600 text-white font-medium text-center transition-colors"
                   >
                     Inquire / Buy
