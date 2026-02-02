@@ -226,7 +226,7 @@ function getStatusBadge(status, quantity) {
                   </button>
                 ) : (
                   <a
-                    href={`/book?service=other&notes=${encodeURIComponent(`Inquiry for: ${tire.name}\nBrand: ${brandName}\nSize: ${tire.size}\nPrice: ${formatPrice(tire.price)}`)}`}
+                    href={`/book?service=tire-inquiry&notes=${encodeURIComponent(`Inquiry for: ${tire.name}\nBrand: ${brandName}\nSize: ${tire.size}\nPrice: ${formatPrice(tire.price)}`)}`}
                     class="block w-full py-2.5 rounded-lg bg-primary-500 hover:bg-primary-600 text-white font-medium text-center transition-colors"
                   >
                     Inquire / Buy
@@ -480,7 +480,7 @@ function getStatusBadge(status, quantity) {
 
       // Build booking URL with pre-filled notes
       const notes = `Inquiry for: ${name}\nBrand: ${brand}\nSize: ${size}\nPrice: ${price}`;
-      modalActionBtn.href = `/book?service=other&notes=${encodeURIComponent(notes)}`;
+      modalActionBtn.href = `/book?service=tire-inquiry&notes=${encodeURIComponent(notes)}`;
 
       modal.classList.remove('hidden');
       modal.classList.add('flex');

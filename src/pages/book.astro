@@ -67,44 +67,24 @@ const DIRECTUS_URL = 'https://directus-production-2cc1.up.railway.app';
               <div class="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold text-sm">1</div>
               <h2 class="text-xl font-bold text-white">Select Service</h2>
             </div>
-            
-            <div class="grid sm:grid-cols-2 gap-3">
+
+            <select
+              name="service"
+              id="service-select"
+              required
+              class="input-field w-full"
+            >
+              <option value="" disabled selected>-- Select a Service --</option>
+
               {services.map((service) => (
-                <label 
-                  class="service-option relative flex items-start gap-3 p-4 rounded-xl border-2 border-dark-700 hover:border-primary-500/50 cursor-pointer transition-all has-[:checked]:border-primary-500 has-[:checked]:bg-primary-500/10"
-                >
-                  <input 
-                    type="radio" 
-                    name="service" 
-                    value={service.name}
-                    required
-                    class="mt-1 w-4 h-4 text-primary-500 bg-dark-800 border-dark-600 focus:ring-primary-500 focus:ring-2"
-                  />
-                  <div class="flex-1">
-                    <div class="font-medium text-white">{service.name}</div>
-                    <div class="text-sm text-dark-400">
-                      {service.duration || 'Contact for estimate'} • {service.price || 'Get Quote'}
-                    </div>
-                  </div>
-                </label>
+                <option value={service.name}>{service.name}</option>
               ))}
-              
-              <!-- Always show "Other" option -->
-              <label 
-                class="service-option relative flex items-start gap-3 p-4 rounded-xl border-2 border-dark-700 hover:border-primary-500/50 cursor-pointer transition-all has-[:checked]:border-primary-500 has-[:checked]:bg-primary-500/10"
-              >
-                <input 
-                  type="radio" 
-                  name="service" 
-                  value="Other / General Inquiry"
-                  class="mt-1 w-4 h-4 text-primary-500 bg-dark-800 border-dark-600 focus:ring-primary-500 focus:ring-2"
-                />
-                <div class="flex-1">
-                  <div class="font-medium text-white">Other / General Inquiry</div>
-                  <div class="text-sm text-dark-400">Varies • Get Quote</div>
-                </div>
-              </label>
-            </div>
+
+              <option disabled>──────────────</option>
+              <option value="Tire Inquiry">Tire Inquiry</option>
+              <option value="Mags Inquiry">Mags Inquiry</option>
+              <option value="Other / General Inquiry">Other / General Inquiry</option>
+            </select>
           </div>
 
           <!-- Divider -->
@@ -360,20 +340,27 @@ const DIRECTUS_URL = 'https://directus-production-2cc1.up.railway.app';
   const preFilledNotes = urlParams.get('notes');
 
   if (preSelectedService) {
-    const serviceInputs = document.querySelectorAll('input[name="service"]');
+    const serviceSelect = document.getElementById('service-select');
     const serviceLower = preSelectedService.toLowerCase();
 
-    serviceInputs.forEach((input) => {
-      const inputValue = input.value.toLowerCase();
+    // Find matching option in dropdown
+    for (const option of serviceSelect.options) {
+      if (option.disabled || !option.value) continue;
+
+      const optionLower = option.value.toLowerCase();
       // Match "other" to "Other / General Inquiry" option
-      if (serviceLower === 'other' && inputValue.includes('other')) {
-        input.checked = true;
+      if (serviceLower === 'other' && optionLower.includes('other')) {
+        serviceSelect.value = option.value;
+        break;
       }
-      // Exact match or partial match (service name contains the param or vice versa)
-      else if (inputValue === serviceLower || inputValue.includes(serviceLower) || serviceLower.includes(inputValue.split('/')[0].trim())) {
-        input.checked = true;
+      // Exact match or partial match
+      else if (optionLower === serviceLower ||
+               optionLower.includes(serviceLower) ||
+               serviceLower.includes(optionLower.split('/')[0].trim())) {
+        serviceSelect.value = option.value;
+        break;
       }
-    });
+    }
   }
 
   // Pre-fill notes field if provided
