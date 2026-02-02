@@ -341,19 +341,20 @@ const DIRECTUS_URL = 'https://directus-production-2cc1.up.railway.app';
 
   if (preSelectedService) {
     const serviceSelect = document.getElementById('service-select');
-    const serviceLower = preSelectedService.toLowerCase();
+    // Normalize: lowercase and replace hyphens with spaces for comparison
+    const serviceLower = preSelectedService.toLowerCase().replace(/-/g, ' ');
 
     // Find matching option in dropdown
     for (const option of serviceSelect.options) {
       if (option.disabled || !option.value) continue;
 
-      const optionLower = option.value.toLowerCase();
+      const optionLower = option.value.toLowerCase().replace(/-/g, ' ');
       // Match "other" to "Other / General Inquiry" option
       if (serviceLower === 'other' && optionLower.includes('other')) {
         serviceSelect.value = option.value;
         break;
       }
-      // Exact match or partial match
+      // Exact match or partial match (normalize both sides)
       else if (optionLower === serviceLower ||
                optionLower.includes(serviceLower) ||
                serviceLower.includes(optionLower.split('/')[0].trim())) {
