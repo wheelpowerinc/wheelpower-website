@@ -1,11 +1,15 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
-import { getServices, getSiteSettings, getImageUrl } from '../lib/directus.js';
-import { tireBrands } from '../lib/brands.js';
+import { getServices, getSiteSettings, getImageUrl, getTireBrands } from '../lib/directus.js';
+
+// Fallback brands in case Directus is unavailable
+const fallbackBrands = ['Sailun', 'Radar', 'Comforser', 'Thunderer', 'Apollo', 'Toyo', 'Dunlop', 'Bridgestone', 'MRF', 'Westlake', 'Deestone', 'Maxxis', 'Yokohama', 'Prinx', 'Goodyear', 'BFGoodrich', 'Arivo'];
 
 // Fetch data from Directus
 const siteSettings = await getSiteSettings();
 const directusServices = await getServices();
+const directusBrands = await getTireBrands();
+const tireBrands = directusBrands?.map(b => b.name) || fallbackBrands;
 
 // Fallback site settings
 const settings = siteSettings || {

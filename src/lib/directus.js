@@ -74,6 +74,16 @@ export async function getMags() {
 }
 
 /**
+ * Get all tire brands
+ */
+export async function getTireBrands() {
+  return await fetchFromDirectus('tire_brands', {
+    sort: 'sort',
+    'filter[status][_eq]': 'published'
+  });
+}
+
+/**
  * Get all gallery items
  */
 export async function getGallery() {

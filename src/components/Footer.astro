@@ -1,11 +1,15 @@
 ---
 // Footer Component - Appears at the bottom of every page
-import { getSiteSettings, getServices, getImageUrl } from '../lib/directus.js';
-import { tireBrands } from '../lib/brands.js';
+import { getSiteSettings, getServices, getImageUrl, getTireBrands } from '../lib/directus.js';
 
-// Fetch site settings and services
+// Fallback brands in case Directus is unavailable
+const fallbackBrands = ['Sailun', 'Radar', 'Comforser', 'Thunderer', 'Apollo', 'Toyo', 'Dunlop', 'Bridgestone', 'MRF', 'Westlake', 'Deestone', 'Maxxis', 'Yokohama', 'Prinx', 'Goodyear', 'BFGoodrich', 'Arivo'];
+
+// Fetch site settings, services, and tire brands
 const siteSettings = await getSiteSettings();
 const directusServices = await getServices();
+const directusBrands = await getTireBrands();
+const tireBrands = directusBrands?.map(b => b.name) || fallbackBrands;
 
 // Use settings or fallback values
 const settings = siteSettings || {};

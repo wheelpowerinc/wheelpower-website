@@ -1,10 +1,16 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import { getTires, getImageUrl, formatPrice, getSiteSettings } from '../../lib/directus.js';
-import { tireBrands as allBrands } from '../../lib/brands.js';
+import { getTires, getImageUrl, formatPrice, getSiteSettings, getTireBrands } from '../../lib/directus.js';
+
+// Fallback brands in case Directus is unavailable
+const fallbackBrands = ['Sailun', 'Radar', 'Comforser', 'Thunderer', 'Apollo', 'Toyo', 'Dunlop', 'Bridgestone', 'MRF', 'Westlake', 'Deestone', 'Maxxis', 'Yokohama', 'Prinx', 'Goodyear', 'BFGoodrich', 'Arivo'];
 
 // Fetch tires from Directus
 const directusTires = await getTires();
+
+// Fetch tire brands from Directus
+const directusBrands = await getTireBrands();
+const allBrands = directusBrands?.map(b => b.name) || fallbackBrands;
 
 // Fetch site settings for phone number
 const siteSettings = await getSiteSettings();
@@ -13,7 +19,7 @@ const phoneNumber = siteSettings?.phone || '+639XXXXXXXXX';
 // Use Directus data if available, otherwise show empty
 const tires = directusTires || [];
 
-// Use brands from config file, with "All" at the start
+// Use brands from Directus, with "All" at the start
 const brands = ['All', ...allBrands];
 
 // Rim sizes for dropdown
