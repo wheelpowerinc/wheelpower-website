@@ -1,44 +1,67 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import { getTires, getImageUrl, formatPrice, getSiteSettings, getTireBrands } from '../../lib/directus.js';
+import { getTireModels, getImageUrl, formatPrice, getSiteSettings, getTireBrands } from '../../lib/directus.js';
 
-// Fallback brands in case Directus is unavailable
 const fallbackBrands = ['Sailun', 'Radar', 'Comforser', 'Thunderer', 'Apollo', 'Toyo', 'Dunlop', 'Bridgestone', 'MRF', 'Westlake', 'Deestone', 'Maxxis', 'Yokohama', 'Prinx', 'Goodyear', 'BFGoodrich', 'Arivo'];
 
-// Fetch tires from Directus
-const directusTires = await getTires();
-
-// Fetch tire brands from Directus
+const directusModels = await getTireModels();
 const directusBrands = await getTireBrands();
 const allBrands = directusBrands?.map(b => b.name) || fallbackBrands;
-
-// Fetch site settings for phone number
 const siteSettings = await getSiteSettings();
 const phoneNumber = siteSettings?.phone || '+639XXXXXXXXX';
 
-// Use Directus data if available, otherwise show empty
-const tires = directusTires || [];
-
-// Use brands from Directus, with "All" at the start
+const models = directusModels || [];
 const brands = ['All', ...allBrands];
 
-// Rim sizes for dropdown
-const rimSizes = ['All', '13', '14', '15', '16', '17', '18', '19'];
+// Build set of all available rim sizes from variants
+const allRimSizes = [...new Set(
+  models.flatMap(m => (m.variants || []).map(v => v.rim_size))
+)].sort((a, b) => a - b);
 
-// Helper function for status badge
-function getStatusBadge(status, quantity) {
-  if (status === 'out_of_stock' || quantity === 0) {
-    return { text: 'Out of Stock', class: 'bg-red-500/20 text-red-400 border-red-500/30' };
+// Helper: get the lowest price from a model's variants
+function getFromPrice(model, rimSize = null) {
+  const variants = (model.variants || []).filter(v => v.status !== 'out_of_stock' && v.quantity > 0);
+  const filtered = rimSize ? variants.filter(v => v.rim_size === rimSize) : variants;
+  if (filtered.length === 0) {
+    const all = rimSize ? (model.variants || []).filter(v => v.rim_size === rimSize) : (model.variants || []);
+    if (all.length === 0) return null;
+    return Math.min(...all.map(v => v.price));
   }
-  if (status === 'limited' || (quantity && quantity <= 3)) {
-    return { text: `Only ${quantity} left`, class: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' };
-  }
-  return { text: 'In Stock', class: 'bg-green-500/20 text-green-400 border-green-500/30' };
+  return Math.min(...filtered.map(v => v.price));
+}
+
+// Helper: check if model has any variant on sale
+function hasAnySale(model) {
+  return (model.variants || []).some(v => v.original_price);
+}
+
+// Helper: check if ALL variants are out of stock
+function isModelOutOfStock(model) {
+  const variants = model.variants || [];
+  if (variants.length === 0) return true;
+  return variants.every(v => v.status === 'out_of_stock' || v.quantity === 0);
+}
+
+// Helper: get brand name from model
+function getBrandName(model) {
+  if (typeof model.brand === 'object' && model.brand?.name) return model.brand.name;
+  if (typeof model.brand === 'string') return model.brand;
+  return 'Other';
+}
+
+// Helper: get comma-separated variant sizes for search matching
+function getVariantSizes(model) {
+  return (model.variants || []).map(v => v.size?.toLowerCase() || '').join(',');
+}
+
+// Helper: get comma-separated rim sizes for filtering
+function getVariantRimSizes(model) {
+  return [...new Set((model.variants || []).map(v => String(v.rim_size)))].join(',');
 }
 ---
 
-<MainLayout 
-  title="Tires" 
+<MainLayout
+  title="Tires"
   description="Browse quality tires from top brands - Sailun, Radar, Comforser, Thunderer, Apollo, Toyo, Dunlop. Available at WheelPower Auto Shop in Baras, Rizal."
 >
 
@@ -51,7 +74,7 @@ function getStatusBadge(status, quantity) {
         Quality tires from trusted brands. Find the perfect tires for your vehicle and budget.
       </p>
       <div class="inline-flex items-center gap-3 mt-5 px-6 py-3 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-base">
-        <span class="text-lg">✓</span>
+        <span class="text-lg">&#10003;</span>
         All listed tires include free mounting and installation
       </div>
     </div>
@@ -60,14 +83,12 @@ function getStatusBadge(status, quantity) {
   <!-- Search and Brand Filter -->
   <section class="py-4 md:py-8 border-b border-dark-800 sticky top-16 md:top-20 bg-dark-950/95 backdrop-blur-md z-30">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Search Bar and Rim Size Dropdown -->
       <div class="flex gap-3 max-w-xl mx-auto mb-4">
-        <!-- Search -->
         <div class="relative flex-1">
-          <input 
-            type="text" 
-            id="tire-search" 
-            placeholder="Search brand, name, or size..."
+          <input
+            type="text"
+            id="tire-search"
+            placeholder="Search brand, model, or size..."
             class="input-field px-4 pr-10"
           />
           <button id="clear-search" class="absolute right-3 top-1/2 -translate-y-1/2 text-dark-500 hover:text-white hidden">
@@ -79,15 +100,15 @@ function getStatusBadge(status, quantity) {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
-        
-        <!-- Rim Size Dropdown -->
+
         <div class="relative">
-          <select 
-            id="rim-size-filter" 
+          <select
+            id="rim-size-filter"
             class="input-field appearance-none pr-10 min-w-[120px] cursor-pointer"
           >
-            {rimSizes.map((size) => (
-              <option value={size.toLowerCase()}>{size === 'All' ? 'All Rims' : `${size}"`}</option>
+            <option value="all">All Rims</option>
+            {allRimSizes.map((size) => (
+              <option value={String(size)}>{size}"</option>
             ))}
           </select>
           <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,12 +116,11 @@ function getStatusBadge(status, quantity) {
           </svg>
         </div>
       </div>
-      
-      <!-- Brand Filter - Horizontal scroll on mobile -->
+
       <div class="overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
         <div class="flex gap-2 md:flex-wrap md:justify-center min-w-max md:min-w-0">
           {brands.map((brand) => (
-            <button 
+            <button
               class="brand-filter px-4 py-2 rounded-full text-sm font-medium border transition-all whitespace-nowrap data-[active=true]:bg-primary-500 data-[active=true]:border-primary-500 data-[active=true]:text-white border-dark-600 text-dark-300 hover:border-primary-500/50 hover:text-white"
               data-brand={brand.toLowerCase()}
               data-active={brand === 'All' ? 'true' : 'false'}
@@ -113,49 +133,47 @@ function getStatusBadge(status, quantity) {
     </div>
   </section>
 
-  <!-- Tires Grid -->
+  <!-- Models Grid -->
   <section class="py-12 md:py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <!-- Results count -->
+
       <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <p class="text-dark-400">
-          Showing <span id="tire-count" class="text-white font-medium">{tires.length}</span> tires
+          Showing <span id="tire-count" class="text-white font-medium">{models.length}</span> tires
         </p>
         <p class="text-dark-500 text-sm">
-          💡 Prices are per tire. Installation available.
+          Prices are per tire. Free installation included.
         </p>
       </div>
-      
-      <!-- Tires Grid -->
+
       <div id="tires-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {tires.map((tire) => {
-          const statusBadge = getStatusBadge(tire.status, tire.quantity);
-          const isOutOfStock = tire.status === 'out_of_stock' || tire.quantity === 0;
-          const brandName = typeof tire.brand === 'string' ? tire.brand : 'Other';
-          
+        {models.map((model) => {
+          const brandName = getBrandName(model);
+          const outOfStock = isModelOutOfStock(model);
+          const fromPrice = getFromPrice(model);
+          const onSale = hasAnySale(model);
+
           return (
-            <div 
-              class={`tire-card card overflow-hidden group ${isOutOfStock ? 'opacity-60' : ''}`}
+            <a
+              href={`/tires/${model.slug}`}
+              class={`tire-card card overflow-hidden group block ${outOfStock ? 'opacity-60' : ''}`}
               data-brand={brandName.toLowerCase()}
-              data-name={tire.name?.toLowerCase() || ''}
-              data-size={tire.size?.toLowerCase() || ''}
-              data-rim={tire.rim_size || ''}
+              data-name={model.name?.toLowerCase() || ''}
+              data-sizes={getVariantSizes(model)}
+              data-rims={getVariantRimSizes(model)}
+              data-from-prices={JSON.stringify(
+                Object.fromEntries(
+                  allRimSizes.map(r => [r, getFromPrice(model, r)])
+                )
+              )}
             >
               <!-- Image -->
-              <div 
-                class="aspect-square bg-gradient-to-br from-dark-800 to-dark-900 relative overflow-hidden flex items-center justify-center cursor-pointer tire-image-trigger"
-                data-image={tire.image ? getImageUrl(tire.image) : ''}
-                data-name={tire.name}
-                data-brand={brandName}
-                data-size={tire.size}
-                data-price={formatPrice(tire.price)}
-              >
-                {tire.image ? (
-                  <img 
-                    src={getImageUrl(tire.image)} 
-                    alt={tire.name}
-                    class="w-full h-full object-contain p-2 hover:scale-105 transition-transform"
+              <div class="aspect-square bg-gradient-to-br from-dark-800 to-dark-900 relative overflow-hidden flex items-center justify-center">
+                {model.image ? (
+                  <img
+                    src={getImageUrl(model.image)}
+                    alt={model.name}
+                    class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform"
                   />
                 ) : (
                   <div class="text-center">
@@ -163,16 +181,16 @@ function getStatusBadge(status, quantity) {
                     <p class="text-dark-500 text-xs capitalize">{brandName}</p>
                   </div>
                 )}
-                
-                <!-- Status Badge -->
-                <div class="absolute top-3 left-3">
-                  <span class={`px-2 py-1 rounded-full text-xs font-medium border ${statusBadge.class}`}>
-                    {statusBadge.text}
-                  </span>
-                </div>
-                
-                <!-- Sale Badge -->
-                {tire.original_price && (
+
+                {outOfStock && (
+                  <div class="absolute top-3 left-3">
+                    <span class="px-2 py-1 rounded-full text-xs font-medium border bg-red-500/20 text-red-400 border-red-500/30">
+                      Out of Stock
+                    </span>
+                  </div>
+                )}
+
+                {onSale && !outOfStock && (
                   <div class="absolute top-3 right-3">
                     <span class="px-2 py-1 bg-primary-500 text-white rounded-full text-xs font-bold">
                       SALE
@@ -180,76 +198,57 @@ function getStatusBadge(status, quantity) {
                   </div>
                 )}
               </div>
-              
+
               <!-- Info -->
               <div class="p-4">
-                <!-- Brand & Type -->
                 <div class="flex items-center gap-2 mb-2">
                   <span class="text-primary-400 text-sm font-medium capitalize">{brandName}</span>
-                  {tire.type && (
+                  {model.type && (
                     <>
-                      <span class="text-dark-600">•</span>
-                      <span class="text-dark-400 text-sm">{tire.type}</span>
+                      <span class="text-dark-600">&bull;</span>
+                      <span class="text-dark-400 text-sm">{model.type}</span>
                     </>
                   )}
                 </div>
-                
-                <!-- Name & Size -->
+
                 <h3 class="font-bold text-white group-hover:text-primary-400 transition-colors mb-1">
-                  {tire.name}
+                  {model.name}
                 </h3>
-                <p class="text-dark-400 text-sm mb-3">Size: {tire.size}</p>
-                
-                <!-- Features -->
-                {tire.features && tire.features.length > 0 && (
-                  <div class="flex flex-wrap gap-1 mb-4">
-                    {tire.features.slice(0, 2).map((feature) => (
+
+                {model.features && model.features.length > 0 && (
+                  <div class="flex flex-wrap gap-1 mb-3">
+                    {model.features.slice(0, 2).map((feature) => (
                       <span class="px-2 py-0.5 bg-dark-800 rounded text-xs text-dark-300">
                         {feature}
                       </span>
                     ))}
                   </div>
                 )}
-                
-                <!-- Price -->
-                <div class="flex items-center gap-2 mb-4">
-                  <span class="text-xl font-bold text-white">{formatPrice(tire.price)}</span>
-                  {tire.original_price && (
-                    <span class="text-dark-500 line-through text-sm">{formatPrice(tire.original_price)}</span>
+
+                <div class="flex items-baseline gap-1">
+                  {fromPrice ? (
+                    <>
+                      <span class="text-dark-400 text-sm">From</span>
+                      <span class="text-lg font-bold text-white from-price">{formatPrice(fromPrice)}</span>
+                    </>
+                  ) : (
+                    <span class="text-dark-400 text-sm">Contact for price</span>
                   )}
                 </div>
-                
-                <!-- Action Button -->
-                {isOutOfStock ? (
-                  <button disabled class="w-full py-2.5 rounded-lg bg-dark-800 text-dark-500 font-medium cursor-not-allowed">
-                    Out of Stock
-                  </button>
-                ) : (
-                  <a
-                    href={`/book?service=tire-inquiry&notes=${encodeURIComponent(`Inquiry for: ${tire.name}\nBrand: ${brandName}\nSize: ${tire.size}\nPrice: ${formatPrice(tire.price)}`)}`}
-                    class="block w-full py-2.5 rounded-lg bg-primary-500 hover:bg-primary-600 text-white font-medium text-center transition-colors"
-                  >
-                    Inquire / Buy
-                  </a>
-                )}
               </div>
-            </div>
+            </a>
           );
         })}
       </div>
-      
-      <!-- More Tires CTA - Always visible -->
-      <div id="more-tires-cta" class="text-center py-12 mt-8 border-t border-dark-800">
+
+      <!-- More Tires CTA -->
+      <div class="text-center py-12 mt-8 border-t border-dark-800">
         <div class="text-5xl mb-4">🔘</div>
         <h3 class="text-xl font-bold text-white mb-2">More tires available at our shop!</h3>
         <p class="text-dark-400 mb-6">We have more sizes and brands in stock. Visit us or get in touch to see our full collection.</p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <a href="/contact" class="btn-secondary">
-            Contact Us
-          </a>
-          <a href={`tel:${phoneNumber}`} class="btn-primary">
-            📞 Call Us
-          </a>
+          <a href="/contact" class="btn-secondary">Contact Us</a>
+          <a href={`tel:${phoneNumber}`} class="btn-primary">Call Us</a>
         </div>
       </div>
     </div>
@@ -285,45 +284,22 @@ function getStatusBadge(status, quantity) {
         Can't Find What You're Looking For?
       </h2>
       <p class="text-dark-300 mb-8">
-        We may have more sizes and brands in stock. Contact us with your vehicle details 
+        We may have more sizes and brands in stock. Contact us with your vehicle details
         and we'll find the perfect tires for you.
       </p>
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a href="/contact" class="btn-secondary">
-          Send Inquiry
-        </a>
-        <a href={`tel:${phoneNumber}`} class="btn-primary">
-          📞 Call Us
-        </a>
+        <a href="/contact" class="btn-secondary">Send Inquiry</a>
+        <a href={`tel:${phoneNumber}`} class="btn-primary">Call Us</a>
       </div>
     </div>
   </section>
 
 </MainLayout>
 
-<!-- Image Modal -->
-<div id="image-modal" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-4">
-  <button id="modal-close" class="absolute top-4 right-4 text-white text-4xl hover:text-primary-400 transition-colors">&times;</button>
-  <div class="max-w-3xl w-full">
-    <img id="modal-image" src="" alt="" class="w-full max-h-[60vh] object-contain mb-4" />
-    <div id="modal-details" class="bg-dark-900 rounded-lg p-4 text-center">
-      <p class="text-primary-400 text-sm font-medium mb-1" id="modal-brand"></p>
-      <h3 class="text-xl font-bold text-white mb-2" id="modal-name"></h3>
-      <p class="text-dark-400 mb-2" id="modal-size"></p>
-      <p class="text-2xl font-bold text-white mb-4" id="modal-price"></p>
-      <a id="modal-action-btn" href="/book" class="inline-block px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors">
-        Inquire / Buy
-      </a>
-    </div>
-  </div>
-</div>
-
-<!-- Filter Script -->
 <script>
   const filterButtons = document.querySelectorAll('.brand-filter');
   const tireCards = document.querySelectorAll('.tire-card');
   const tireCount = document.getElementById('tire-count');
-  const emptyState = document.getElementById('empty-state');
   const tiresGrid = document.getElementById('tires-grid');
   const searchInput = document.getElementById('tire-search');
   const clearSearchBtn = document.getElementById('clear-search');
@@ -336,57 +312,58 @@ function getStatusBadge(status, quantity) {
 
   function filterTires() {
     let visibleCount = 0;
-    
+
     tireCards.forEach((card) => {
       const cardBrand = card.dataset.brand || '';
       const cardName = card.dataset.name || '';
-      const cardSize = card.dataset.size || '';
-      const cardRim = card.dataset.rim || '';
-      
-      // Check brand filter
+      const cardSizes = card.dataset.sizes || '';
+      const cardRims = card.dataset.rims || '';
+
       const matchesBrand = currentBrand === 'all' || cardBrand === currentBrand;
-      
-      // Check rim size filter
-      const matchesRim = currentRimSize === 'all' || cardRim === currentRimSize;
-      
-      // Check search filter
+      const matchesRim = currentRimSize === 'all' || cardRims.split(',').includes(currentRimSize);
+
       const searchTerm = currentSearch.toLowerCase().trim();
-      const matchesSearch = searchTerm === '' || 
-        cardBrand.includes(searchTerm) || 
-        cardName.includes(searchTerm) || 
-        cardSize.includes(searchTerm);
-      
+      const matchesSearch = searchTerm === '' ||
+        cardBrand.includes(searchTerm) ||
+        cardName.includes(searchTerm) ||
+        cardSizes.includes(searchTerm);
+
       const shouldShow = matchesBrand && matchesSearch && matchesRim;
-      
+
       if (shouldShow) {
         card.style.display = 'block';
         visibleCount++;
+
+        // Update "From" price based on rim size filter
+        const fromPriceEl = card.querySelector('.from-price');
+        if (fromPriceEl && currentRimSize !== 'all') {
+          try {
+            const prices = JSON.parse(card.dataset.fromPrices || '{}');
+            const rimPrice = prices[currentRimSize];
+            if (rimPrice) {
+              fromPriceEl.textContent = '\u20B1' + Number(rimPrice).toLocaleString();
+            }
+          } catch (e) {}
+        } else if (fromPriceEl) {
+          try {
+            const prices = JSON.parse(card.dataset.fromPrices || '{}');
+            const allPrices = Object.values(prices).filter(p => p !== null);
+            if (allPrices.length > 0) {
+              fromPriceEl.textContent = '\u20B1' + Number(Math.min(...allPrices)).toLocaleString();
+            }
+          } catch (e) {}
+        }
       } else {
         card.style.display = 'none';
       }
     });
-    
-    if (tireCount) {
-      tireCount.textContent = visibleCount.toString();
-    }
-    
-    if (emptyState && tiresGrid) {
-      if (visibleCount === 0 && tireCards.length > 0) {
-        emptyState.classList.remove('hidden');
-        tiresGrid.classList.add('hidden');
-      } else {
-        emptyState.classList.add('hidden');
-        tiresGrid.classList.remove('hidden');
-      }
-    }
-    
-    // Update active brand button
+
+    if (tireCount) tireCount.textContent = visibleCount.toString();
+
     filterButtons.forEach((btn) => {
-      const btnBrand = btn.dataset.brand;
-      btn.dataset.active = (btnBrand === currentBrand).toString();
+      btn.dataset.active = (btn.dataset.brand === currentBrand).toString();
     });
 
-    // Show/hide clear button and search icon
     if (clearSearchBtn && searchIcon) {
       if (currentSearch) {
         clearSearchBtn.classList.remove('hidden');
@@ -398,7 +375,6 @@ function getStatusBadge(status, quantity) {
     }
   }
 
-  // Brand filter click
   filterButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       currentBrand = btn.dataset.brand || 'all';
@@ -406,7 +382,6 @@ function getStatusBadge(status, quantity) {
     });
   });
 
-  // Search input
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
       currentSearch = e.target.value;
@@ -414,7 +389,6 @@ function getStatusBadge(status, quantity) {
     });
   }
 
-  // Clear search button
   if (clearSearchBtn) {
     clearSearchBtn.addEventListener('click', () => {
       if (searchInput) {
@@ -425,7 +399,6 @@ function getStatusBadge(status, quantity) {
     });
   }
 
-  // Rim size dropdown
   if (rimSizeFilter) {
     rimSizeFilter.addEventListener('change', (e) => {
       currentRimSize = e.target.value;
@@ -433,80 +406,16 @@ function getStatusBadge(status, quantity) {
     });
   }
 
-  // Check URL params for pre-selected brand or rim size
+  // URL params
   const urlParams = new URLSearchParams(window.location.search);
   const brandParam = urlParams.get('brand');
   const rimParam = urlParams.get('rim');
-  
-  if (brandParam) {
-    currentBrand = brandParam.toLowerCase();
-  }
+
+  if (brandParam) currentBrand = brandParam.toLowerCase();
   if (rimParam) {
     currentRimSize = rimParam;
-    if (rimSizeFilter) {
-      rimSizeFilter.value = rimParam;
-    }
+    if (rimSizeFilter) rimSizeFilter.value = rimParam;
   }
-  
+
   filterTires();
-
-  // Image Modal
-  const modal = document.getElementById('image-modal');
-  const modalImage = document.getElementById('modal-image');
-  const modalName = document.getElementById('modal-name');
-  const modalBrand = document.getElementById('modal-brand');
-  const modalSize = document.getElementById('modal-size');
-  const modalPrice = document.getElementById('modal-price');
-  const modalClose = document.getElementById('modal-close');
-  const modalActionBtn = document.getElementById('modal-action-btn');
-  const imageTriggers = document.querySelectorAll('.tire-image-trigger');
-
-  imageTriggers.forEach((trigger) => {
-    trigger.addEventListener('click', () => {
-      const image = trigger.dataset.image;
-      if (!image) return;
-
-      const name = trigger.dataset.name;
-      const brand = trigger.dataset.brand;
-      const size = trigger.dataset.size;
-      const price = trigger.dataset.price;
-
-      modalImage.src = image;
-      modalImage.alt = name;
-      modalName.textContent = name;
-      modalBrand.textContent = brand;
-      modalSize.textContent = 'Size: ' + size;
-      modalPrice.textContent = price;
-
-      // Build booking URL with pre-filled notes
-      const notes = `Inquiry for: ${name}\nBrand: ${brand}\nSize: ${size}\nPrice: ${price}`;
-      modalActionBtn.href = `/book?service=tire-inquiry&notes=${encodeURIComponent(notes)}`;
-
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      document.body.style.overflow = 'hidden';
-    });
-  });
-
-  modalClose.addEventListener('click', () => {
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-    document.body.style.overflow = '';
-  });
-
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-      document.body.style.overflow = '';
-    }
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-      document.body.style.overflow = '';
-    }
-  });
 </script>

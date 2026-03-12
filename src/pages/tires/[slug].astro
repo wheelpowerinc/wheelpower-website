@@ -1,0 +1,304 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import { getTireModels, getTireModelBySlug, getRelatedTireModels, getImageUrl, formatPrice, getSiteSettings } from '../../lib/directus.js';
+
+// Generate static paths for all tire models
+export async function getStaticPaths() {
+  const models = await getTireModels();
+  if (!models) return [];
+  return models.map((model) => ({
+    params: { slug: model.slug },
+  }));
+}
+
+const { slug } = Astro.params;
+const model = await getTireModelBySlug(slug);
+
+if (!model) {
+  return Astro.redirect('/tires');
+}
+
+const siteSettings = await getSiteSettings();
+const phoneNumber = siteSettings?.phone || '+639XXXXXXXXX';
+
+// Get brand name
+const brandName = typeof model.brand === 'object' && model.brand?.name ? model.brand.name : typeof model.brand === 'string' ? model.brand : 'Other';
+const brandId = typeof model.brand === 'object' ? model.brand.id : model.brand;
+
+// Get related models
+const relatedModels = await getRelatedTireModels(brandId, model.id);
+
+// Organize variants by rim size
+const variants = model.variants || [];
+const variantsByRim = {};
+variants.forEach(v => {
+  const rim = v.rim_size;
+  if (!variantsByRim[rim]) variantsByRim[rim] = [];
+  variantsByRim[rim].push(v);
+});
+
+// Sort rim sizes and sort variants within each rim by price
+const rimSizes = Object.keys(variantsByRim).map(Number).sort((a, b) => a - b);
+rimSizes.forEach(rim => {
+  variantsByRim[rim].sort((a, b) => a.price - b.price);
+});
+
+// Status badge helper
+function getStatusBadge(status, quantity) {
+  if (status === 'out_of_stock' || quantity === 0) {
+    return { text: 'Out of Stock', class: 'bg-red-500/20 text-red-400 border-red-500/30' };
+  }
+  if (status === 'limited' || (quantity && quantity <= 3)) {
+    return { text: `Only ${quantity} left`, class: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' };
+  }
+  return { text: 'In Stock', class: 'bg-green-500/20 text-green-400 border-green-500/30' };
+}
+
+// Helper for related models
+function getFromPrice(m) {
+  const vs = (m.variants || []).filter(v => v.status !== 'out_of_stock' && v.quantity > 0);
+  if (vs.length === 0) {
+    const all = m.variants || [];
+    if (all.length === 0) return null;
+    return Math.min(...all.map(v => v.price));
+  }
+  return Math.min(...vs.map(v => v.price));
+}
+
+function getRelatedBrandName(m) {
+  if (typeof m.brand === 'object' && m.brand?.name) return m.brand.name;
+  if (typeof m.brand === 'string') return m.brand;
+  return 'Other';
+}
+---
+
+<MainLayout
+  title={`${model.name} - ${brandName} | Tires`}
+  description={`${brandName} ${model.name} tires. Available in ${rimSizes.map(r => r + '"').join(', ')} rim sizes. Free mounting and installation at WheelPower Auto Shop.`}
+>
+
+  <!-- Breadcrumb -->
+  <section class="bg-dark-950 pt-6 pb-2">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav class="flex items-center gap-2 text-sm text-dark-400">
+        <a href="/tires" class="hover:text-primary-400 transition-colors">Tires</a>
+        <span>&rsaquo;</span>
+        <a href={`/tires?brand=${brandName.toLowerCase()}`} class="hover:text-primary-400 transition-colors">{brandName}</a>
+        <span>&rsaquo;</span>
+        <span class="text-white">{model.name}</span>
+      </nav>
+    </div>
+  </section>
+
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-b from-dark-950 to-dark-900 py-8 md:py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+
+        <!-- Image -->
+        <div class="aspect-square bg-gradient-to-br from-dark-800 to-dark-900 rounded-2xl overflow-hidden flex items-center justify-center">
+          {model.image ? (
+            <img
+              src={getImageUrl(model.image)}
+              alt={`${brandName} ${model.name}`}
+              class="w-full h-full object-contain p-4"
+            />
+          ) : (
+            <div class="text-center">
+              <div class="text-8xl mb-4">🔘</div>
+              <p class="text-dark-500 capitalize">{brandName}</p>
+            </div>
+          )}
+        </div>
+
+        <!-- Details -->
+        <div>
+          <span class="text-primary-400 font-medium text-lg">{brandName}</span>
+          <h1 class="text-3xl md:text-4xl font-bold text-white mt-1 mb-3">{model.name}</h1>
+
+          {model.type && (
+            <span class="inline-block px-3 py-1 bg-dark-800 rounded-full text-sm text-dark-300 mb-4">
+              {model.type}
+            </span>
+          )}
+
+          {model.features && model.features.length > 0 && (
+            <div class="flex flex-wrap gap-2 mb-6">
+              {model.features.map((feature) => (
+                <span class="px-3 py-1 bg-primary-500/10 text-primary-400 rounded-full text-sm border border-primary-500/20">
+                  {feature}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/20 text-emerald-400 font-medium text-sm">
+            <span>&#10003;</span>
+            Free mounting and installation
+          </div>
+
+          {model.description && (
+            <p class="text-dark-300 mt-6 leading-relaxed">{model.description}</p>
+          )}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rim Size Selector + Variants -->
+  <section class="py-8 md:py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <h2 class="text-xl font-bold text-white mb-6">Available Sizes & Prices</h2>
+
+      <!-- Rim Size Tabs -->
+      {rimSizes.length > 0 ? (
+        <>
+          <div class="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+            {rimSizes.map((rim, index) => (
+              <button
+                class="rim-tab px-5 py-2.5 rounded-full text-sm font-medium border transition-all whitespace-nowrap data-[active=true]:bg-primary-500 data-[active=true]:border-primary-500 data-[active=true]:text-white border-dark-600 text-dark-300 hover:border-primary-500/50 hover:text-white"
+                data-rim={rim}
+                data-active={index === 0 ? 'true' : 'false'}
+              >
+                {rim}"
+              </button>
+            ))}
+          </div>
+
+          <!-- Variant Lists (one per rim size) -->
+          {rimSizes.map((rim, index) => (
+            <div
+              class={`rim-panel space-y-3 ${index === 0 ? '' : 'hidden'}`}
+              data-rim-panel={rim}
+            >
+              {variantsByRim[rim].map((variant) => {
+                const badge = getStatusBadge(variant.status, variant.quantity);
+                const isOut = variant.status === 'out_of_stock' || variant.quantity === 0;
+
+                return (
+                  <div class={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-dark-900 border border-dark-800 ${isOut ? 'opacity-60' : ''}`}>
+                    <div class="flex items-center gap-4 flex-1">
+                      <span class="text-white font-bold text-lg min-w-[140px]">{variant.size}</span>
+                      <span class={`px-2 py-1 rounded-full text-xs font-medium border ${badge.class}`}>
+                        {badge.text}
+                      </span>
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                      <div class="text-right">
+                        <span class="text-xl font-bold text-white">{formatPrice(variant.price)}</span>
+                        {variant.original_price && (
+                          <span class="text-dark-500 line-through text-sm ml-2">{formatPrice(variant.original_price)}</span>
+                        )}
+                      </div>
+
+                      {isOut ? (
+                        <button disabled class="px-5 py-2.5 rounded-lg bg-dark-800 text-dark-500 font-medium cursor-not-allowed text-sm">
+                          Out of Stock
+                        </button>
+                      ) : (
+                        <a
+                          href={`/book?service=tire-inquiry&notes=${encodeURIComponent(`Inquiry for: ${model.name}\nBrand: ${brandName}\nSize: ${variant.size}\nPrice: ${formatPrice(variant.price)}`)}`}
+                          class="px-5 py-2.5 rounded-lg bg-primary-500 hover:bg-primary-600 text-white font-medium text-sm transition-colors whitespace-nowrap"
+                        >
+                          Inquire / Buy
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </>
+      ) : (
+        <div class="text-center py-12">
+          <p class="text-dark-400">No sizes available yet. Contact us for availability.</p>
+          <a href={`tel:${phoneNumber}`} class="btn-primary mt-4 inline-block">Call Us</a>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- Related Tires -->
+  {relatedModels.length > 0 && (
+    <section class="py-12 border-t border-dark-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-xl font-bold text-white mb-6">More from {brandName}</h2>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {relatedModels.map((related) => {
+            const relBrand = getRelatedBrandName(related);
+            const relPrice = getFromPrice(related);
+
+            return (
+              <a href={`/tires/${related.slug}`} class="card overflow-hidden group block">
+                <div class="aspect-square bg-gradient-to-br from-dark-800 to-dark-900 flex items-center justify-center overflow-hidden">
+                  {related.image ? (
+                    <img
+                      src={getImageUrl(related.image)}
+                      alt={related.name}
+                      class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform"
+                    />
+                  ) : (
+                    <div class="text-6xl">🔘</div>
+                  )}
+                </div>
+                <div class="p-4">
+                  <span class="text-primary-400 text-sm font-medium">{relBrand}</span>
+                  <h3 class="font-bold text-white group-hover:text-primary-400 transition-colors">
+                    {related.name}
+                  </h3>
+                  {relPrice && (
+                    <p class="text-dark-400 text-sm mt-1">From <span class="text-white font-medium">{formatPrice(relPrice)}</span></p>
+                  )}
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- CTA -->
+  <section class="py-16 bg-dark-900/50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-2xl font-bold text-white mb-4">Need Help Choosing?</h2>
+      <p class="text-dark-300 mb-8">
+        Not sure which size fits your vehicle? Contact us and we'll help you find the right match.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/contact" class="btn-secondary">Send Inquiry</a>
+        <a href={`tel:${phoneNumber}`} class="btn-primary">Call Us</a>
+      </div>
+    </div>
+  </section>
+
+</MainLayout>
+
+<!-- Rim Size Tab Script -->
+<script>
+  const rimTabs = document.querySelectorAll('.rim-tab');
+  const rimPanels = document.querySelectorAll('.rim-panel');
+
+  rimTabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const selectedRim = tab.dataset.rim;
+
+      // Update tab active states
+      rimTabs.forEach(t => {
+        t.dataset.active = (t.dataset.rim === selectedRim).toString();
+      });
+
+      // Show/hide panels
+      rimPanels.forEach(panel => {
+        if (panel.dataset.rimPanel === selectedRim) {
+          panel.classList.remove('hidden');
+        } else {
+          panel.classList.add('hidden');
+        }
+      });
+    });
+  });
+</script>

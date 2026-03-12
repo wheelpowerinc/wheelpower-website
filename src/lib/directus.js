@@ -64,6 +64,50 @@ export async function getTires() {
 }
 
 /**
+ * Get all tire models with their variants and brand info
+ */
+export async function getTireModels() {
+  const models = await fetchFromDirectus('tire_models', {
+    'fields[]': '*,variants.*,brand.id,brand.name',
+    'filter[status][_eq]': 'published',
+    sort: 'sort'
+  });
+
+  if (!models) return null;
+  return models;
+}
+
+/**
+ * Get a single tire model by slug with variants and brand
+ */
+export async function getTireModelBySlug(slug) {
+  const models = await fetchFromDirectus('tire_models', {
+    'fields[]': '*,variants.*,brand.id,brand.name',
+    'filter[slug][_eq]': slug,
+    'filter[status][_eq]': 'published',
+    limit: 1
+  });
+
+  if (!models || models.length === 0) return null;
+  return models[0];
+}
+
+/**
+ * Get other tire models from the same brand (for related section)
+ */
+export async function getRelatedTireModels(brandId, excludeModelId) {
+  const models = await fetchFromDirectus('tire_models', {
+    'fields[]': '*,variants.*,brand.id,brand.name',
+    'filter[status][_eq]': 'published',
+    'filter[brand][_eq]': brandId,
+    'filter[id][_neq]': excludeModelId,
+    limit: 4
+  });
+
+  return models || [];
+}
+
+/**
  * Get all mags
  */
 export async function getMags() {
