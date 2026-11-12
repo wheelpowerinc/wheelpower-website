@@ -11,14 +11,14 @@ const currentPath = Astro.url.pathname;
 const navLinks = [
   { name: 'Home', href: '/' },
   { name: 'Services', href: '/services' },
-  { name: 'Tires', href: '/tires' },
-  { name: 'Mags', href: '/mags' },
   { name: 'Gallery', href: '/gallery' },
   { name: 'Contact', href: '/contact' },
 ];
+const shopIsActive = currentPath.startsWith('/tires') || currentPath.startsWith('/mags');
+const phone = settings.phone || '09977255450';
 ---
 
-<header class="fixed w-full top-0 z-50 bg-dark-900 border-b border-dark-700">
+<header class="fixed w-full top-0 z-50 bg-[#171717]/95 backdrop-blur-md border-b border-white/10">
   <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center h-16 md:h-20">
       
@@ -57,7 +57,19 @@ const navLinks = [
             {link.name}
           </a>
         ))}
-        <a href="/book" class="ml-4 btn-primary text-sm px-5 py-2.5 cursor-pointer">
+        <div class="relative group/shop">
+          <button type="button" class={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${shopIsActive ? 'text-primary-400 bg-primary-500/10' : 'text-dark-300 hover:text-primary-400 hover:bg-dark-800'}`} aria-haspopup="true">
+            Shop <span aria-hidden="true" class="ml-1">⌄</span>
+          </button>
+          <div class="invisible absolute left-0 top-full min-w-44 translate-y-1 rounded-xl border border-white/10 bg-[#171717] p-2 opacity-0 shadow-xl transition-all group-hover/shop:visible group-hover/shop:translate-y-0 group-hover/shop:opacity-100 group-focus-within/shop:visible group-focus-within/shop:translate-y-0 group-focus-within/shop:opacity-100">
+            <a href="/tires" class="block rounded-lg px-3 py-2 text-sm text-dark-200 hover:bg-dark-800 hover:text-primary-400">Tires</a>
+            <a href="/mags" class="block rounded-lg px-3 py-2 text-sm text-dark-200 hover:bg-dark-800 hover:text-primary-400">Mags & Wheels</a>
+          </div>
+        </div>
+        <a href={`tel:${phone.replace(/\s/g, '')}`} class="ml-3 hidden xl:inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-white transition-colors hover:border-primary-500 hover:text-primary-400" aria-label={`Call WheelPower at ${phone}`}>
+          <span aria-hidden="true">☎</span> {phone}
+        </a>
+        <a href="/book" class="ml-3 btn-primary text-sm px-5 py-2.5 cursor-pointer">
           Book Now
         </a>
       </div>
@@ -92,6 +104,10 @@ const navLinks = [
             {link.name}
           </a>
         ))}
+        <div class="px-4 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider text-dark-500">Shop</div>
+        <a href="/tires" class={`px-4 py-3 rounded-lg font-medium transition-all ${currentPath.startsWith('/tires') ? 'text-primary-400 bg-primary-500/10' : 'text-dark-300 hover:text-primary-400 hover:bg-dark-800'}`}>Tires</a>
+        <a href="/mags" class={`px-4 py-3 rounded-lg font-medium transition-all ${currentPath.startsWith('/mags') ? 'text-primary-400 bg-primary-500/10' : 'text-dark-300 hover:text-primary-400 hover:bg-dark-800'}`}>Mags & Wheels</a>
+        <a href={`tel:${phone.replace(/\s/g, '')}`} class="mt-2 rounded-lg border border-white/15 px-4 py-3 text-center font-semibold text-white hover:border-primary-500 hover:text-primary-400">Call {phone}</a>
         <a href="/book" class="btn-primary text-center mt-2 cursor-pointer">
           Book Now
         </a>

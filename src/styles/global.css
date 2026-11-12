@@ -16,17 +16,17 @@
   --color-primary-800: #9a3412;
   --color-primary-900: #7c2d12;
   
-  --color-dark-50: #f8fafc;
-  --color-dark-100: #f1f5f9;
-  --color-dark-200: #e2e8f0;
-  --color-dark-300: #cbd5e1;
-  --color-dark-400: #94a3b8;
-  --color-dark-500: #64748b;
-  --color-dark-600: #475569;
-  --color-dark-700: #334155;
-  --color-dark-800: #1e293b;
-  --color-dark-900: #0f172a;
-  --color-dark-950: #020617;
+  --color-dark-50: #f5f3ef;
+  --color-dark-100: #e8e5df;
+  --color-dark-200: #d3d0c9;
+  --color-dark-300: #b9b6af;
+  --color-dark-400: #96938d;
+  --color-dark-500: #77746e;
+  --color-dark-600: #56534f;
+  --color-dark-700: #393734;
+  --color-dark-800: #252422;
+  --color-dark-900: #171717;
+  --color-dark-950: #101010;
   
   --font-family-sans: 'Inter', system-ui, sans-serif;
 }
@@ -78,22 +78,22 @@ body {
   color: white;
   font-weight: 600;
   padding: 0.75rem 1.5rem;
-  border-radius: 9999px;
+  border-radius: 0.75rem;
   transition: all 0.3s ease;
   display: inline-block;
 }
 
 .btn-primary:hover {
   box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.3);
-  transform: scale(1.05);
+  transform: translateY(-1px);
 }
 
 .btn-secondary {
-  border: 2px solid var(--color-dark-600);
+  border: 1px solid rgba(245, 243, 239, 0.38);
   color: white;
   font-weight: 600;
   padding: 0.75rem 1.5rem;
-  border-radius: 9999px;
+  border-radius: 0.75rem;
   transition: all 0.3s ease;
   display: inline-block;
 }
@@ -104,7 +104,7 @@ body {
 }
 
 .card {
-  background: linear-gradient(to bottom right, rgba(30, 41, 59, 0.5), rgba(15, 23, 42, 0.5));
+  background: linear-gradient(to bottom right, rgba(37, 36, 34, 0.92), rgba(23, 23, 23, 0.96));
   border-radius: 1rem;
   border: 1px solid rgba(51, 65, 85, 0.5);
   transition: all 0.3s ease;
@@ -118,6 +118,31 @@ body {
   font-size: 1.875rem;
   font-weight: 700;
   color: white;
+}
+
+/* Warm light panels provide contrast between the dark shop sections. */
+.surface-light {
+  background-color: var(--color-dark-50);
+  color: var(--color-dark-900);
+}
+
+.surface-light .section-title,
+.surface-light h1,
+.surface-light h2,
+.surface-light h3,
+.surface-light h4 {
+  color: var(--color-dark-900);
+}
+
+.surface-light p,
+.surface-light .text-dark-300,
+.surface-light .text-dark-400 {
+  color: #56534f;
+}
+
+.surface-light .card {
+  background: #fff;
+  border-color: #e8e5df;
 }
 
 @media (min-width: 768px) {
