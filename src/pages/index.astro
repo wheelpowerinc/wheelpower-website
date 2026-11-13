@@ -1,6 +1,6 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
-import { getServices, getSiteSettings, getImageUrl, getTireBrands } from '../lib/directus.js';
+import { getServices, getSiteSettings, getImageUrl, getTireBrands, getTireModels, formatPrice } from '../lib/directus.js';
 
 // Fallback brands in case Directus is unavailable
 const fallbackBrands = ['Sailun', 'Radar', 'Comforser', 'Thunderer', 'Apollo', 'Toyo', 'Dunlop', 'Bridgestone', 'MRF', 'Westlake', 'Deestone', 'Maxxis', 'Yokohama', 'Prinx', 'Goodyear', 'BFGoodrich', 'Arivo'];
@@ -9,6 +9,7 @@ const fallbackBrands = ['Sailun', 'Radar', 'Comforser', 'Thunderer', 'Apollo', '
 const siteSettings = await getSiteSettings();
 const directusServices = await getServices();
 const directusBrands = await getTireBrands();
+const directusModels = await getTireModels();
 const tireBrands = directusBrands?.map(b => b.name) || fallbackBrands;
 
 // Fallback site settings
@@ -26,13 +27,38 @@ const settings = siteSettings || {
 // Use Directus services or empty array
 const services = directusServices || [];
 
-// Practical homepage highlights based on current business details
-const highlights = [
-  { title: 'Open daily', detail: settings.business_hours || '8 AM–5 PM', href: '/contact', icon: '◷' },
-  { title: 'Tires for sale', detail: 'Browse sizes and prices', href: '/tires', icon: '◉' },
-  { title: 'Auto care', detail: 'Explore our services', href: '/services', icon: '⚙' },
-  { title: 'Visit our shop', detail: settings.address || 'Marcos Highway, Paenaan, Baras', href: settings.google_maps_url || '/contact', icon: '⌖' },
+const phone = settings.phone || '09977255450';
+
+const partners = [
+  {
+    name: 'Valvoline',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Valvoline_company_logo.svg/3840px-Valvoline_company_logo.svg.png',
+  },
+  {
+    name: 'Würth',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/7/7e/W%C3%BCrth_logo.svg?utm_campaign=index&utm_content=original&utm_source=commons.wikimedia.org',
+  },
+  {
+    name: 'PowerUp',
+    logo: 'https://www.powerupoil.in/automotive-grease/images/1.png',
+  },
 ];
+
+// Feature in-stock models with a clear starting price and available sizes.
+const featuredTires = (directusModels || [])
+  .map((model) => {
+    const variants = (model.variants || [])
+      .filter((variant) => variant.status === 'available' && variant.quantity > 0)
+      .sort((a, b) => a.price - b.price);
+
+    return {
+      ...model,
+      availableVariants: variants,
+      fromPrice: variants[0]?.price,
+    };
+  })
+  .filter((model) => model.availableVariants.length > 0)
+  .slice(0, 4);
 
 // Why choose us
 const whyChooseUs = [
@@ -45,82 +71,117 @@ const whyChooseUs = [
 
 <MainLayout title="Home">
   
-  <!-- Hero Section -->
-  <section class="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-    <!-- Background -->
-    <div class="absolute inset-0">
+  <!-- Shop frontage hero -->
+  <section class="relative isolate flex min-h-[82vh] items-center overflow-hidden bg-dark-950">
+    <div class="absolute inset-0 -z-10">
       {settings.site_hero ? (
-        <img 
-          src={getImageUrl(settings.site_hero)} 
-          alt="WheelPower Auto Shop"
-          class="w-full h-full object-cover"
+        <img
+          src={getImageUrl(settings.site_hero)}
+          alt="WheelPower Tires and Auto Care shop frontage on Marcos Highway"
+          fetchpriority="high"
+          class="h-full w-full object-cover object-[center_58%]"
         />
       ) : (
-        <div class="w-full h-full bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950">
-          <div class="absolute inset-0 opacity-5" style="background-image: radial-gradient(circle at 2px 2px, #f97316 1px, transparent 0); background-size: 40px 40px;"></div>
-        </div>
+        <div class="h-full w-full bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950"></div>
       )}
-      <!-- Overlay -->
-      <div class="absolute inset-0 bg-dark-950/70"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-dark-950/90 via-dark-950/65 to-dark-950/20"></div>
+      <div class="absolute inset-0 bg-gradient-to-t from-dark-950/75 via-transparent to-dark-950/10"></div>
     </div>
-    
-    <!-- Decorative blurs -->
-    <div class="absolute top-1/4 right-0 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl"></div>
-    <div class="absolute bottom-1/4 left-0 w-64 h-64 bg-primary-600/10 rounded-full blur-3xl"></div>
-    
-    <!-- Content -->
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-      <!-- Badge -->
-      <div class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/10 border border-primary-500/30 rounded-full text-primary-400 text-sm font-medium mb-8 animate-fade-in">
-        <span>🏆</span>
-        <span>Trusted Auto Care in Rizal Since Day One</span>
-      </div>
-      
-      <!-- Main heading -->
-      <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight animate-slide-up">
-        <span class="text-white">Wheelpower Auto Shop</span>
-        <br />
-        <span class="bg-gradient-to-r from-primary-400 to-primary-500 bg-clip-text text-transparent">
-          Expert Auto Care
-        </span>
-      </h1>
-      
-      <!-- Subtitle - Using tagline from settings -->
-      <p class="text-dark-300 text-lg md:text-xl max-w-2xl mx-auto mb-10 animate-slide-up" style="animation-delay: 0.1s;">
-        {settings.tagline || 'Your trusted partner for premium tires, professional wheel alignment, and complete auto care services along Marcos Highway, Paenaan, Baras Rizal.'}
-      </p>
-      
-      <!-- CTA Buttons -->
-      <div class="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up" style="animation-delay: 0.2s;">
-        <a href="/book" class="btn-primary text-lg px-8 py-4">
-          📅 Book Appointment
-        </a>
-        <a href="/services" class="btn-secondary text-lg px-8 py-4">
-          View Services
-        </a>
-      </div>
-      
-      <!-- Quick customer highlights -->
-      <div class="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-5xl mx-auto animate-fade-in text-left" style="animation-delay: 0.3s;">
-        {highlights.map((highlight) => (
-          <a href={highlight.href} class="group rounded-xl border border-white/10 bg-dark-900/70 p-4 sm:p-5 backdrop-blur-sm transition-all hover:border-primary-500/50 hover:bg-dark-800/90">
-            <div class="flex items-start gap-3">
-              <span aria-hidden="true" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-500/15 text-lg text-primary-400">{highlight.icon}</span>
-              <div class="min-w-0">
-                <div class="font-semibold text-white transition-colors group-hover:text-primary-400">{highlight.title}</div>
-                <div class="mt-1 text-sm leading-snug text-dark-300">{highlight.detail}</div>
-              </div>
-            </div>
+
+    <div class="relative mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 md:py-28 lg:px-8">
+      <div class="max-w-2xl animate-fade-in text-left">
+        <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-dark-950/55 px-4 py-2 text-sm font-medium text-dark-100 backdrop-blur-sm">
+          <span aria-hidden="true" class="text-primary-400">⌖</span>
+          <span>Paenaan, Baras · Marcos Highway</span>
+        </div>
+
+        <h1 class="mb-6 text-4xl font-black leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+          Tires, wheels<br />
+          <span class="text-primary-400">and auto care.</span>
+        </h1>
+        <p class="mb-8 max-w-xl text-lg leading-relaxed text-dark-100 md:text-xl">
+          {settings.tagline || 'Find the right tires and get dependable auto care at WheelPower, right along Marcos Highway.'}
+        </p>
+
+        <div class="mb-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-medium text-white">
+          <span class="inline-flex items-center gap-2"><span class="text-primary-400">◷</span> Open daily, {settings.business_hours || '8 AM–5 PM'}</span>
+          <a href={settings.google_maps_url || '/contact'} class="text-dark-100 underline decoration-white/40 underline-offset-4 transition-colors hover:text-primary-300">Get directions</a>
+        </div>
+
+        <div class="flex flex-col gap-3 sm:flex-row">
+          <a href="/tires" class="btn-primary text-center text-base md:text-lg">Browse Tires <span aria-hidden="true">→</span></a>
+          <a href="/book" class="btn-secondary border-white/50 bg-dark-950/30 text-center text-base text-white backdrop-blur-sm md:text-lg">Book Appointment</a>
+          <a href={`tel:${phone.replace(/\s/g, '')}`} class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/40 bg-dark-950/30 px-6 py-3 font-semibold text-white backdrop-blur-sm transition-colors hover:border-primary-400 hover:text-primary-300 sm:hidden">
+            <span aria-hidden="true">☎</span> Call {phone}
           </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Partner showcase -->
+  <section class="surface-light border-b border-dark-100 py-8 md:py-10" aria-labelledby="partners-title">
+    <div class="mx-auto flex max-w-7xl flex-col items-center gap-5 px-4 sm:px-6 md:flex-row md:justify-between lg:px-8">
+      <div class="text-center md:text-left">
+        <p class="section-subtitle !text-primary-600">Trusted product partners</p>
+        <h2 id="partners-title" class="text-xl font-bold text-dark-900">Partners with</h2>
+      </div>
+      <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+        {partners.map((partner) => (
+          <div class="flex h-16 min-w-36 items-center justify-center rounded-xl border border-dark-100 bg-white px-5 py-3 shadow-sm sm:min-w-40" title={partner.name}>
+            <img src={partner.logo} alt={`${partner.name} logo`} loading="lazy" class="max-h-10 max-w-32 object-contain" />
+          </div>
         ))}
       </div>
     </div>
-    
-    <!-- Scroll indicator -->
-    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-      <svg class="w-6 h-6 text-dark-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-      </svg>
+  </section>
+
+  <!-- Featured tire inventory preview -->
+  <section class="bg-dark-950 py-16 md:py-20" id="featured-tires">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p class="section-subtitle">Featured tire inventory</p>
+          <h2 class="section-title">Find your next set</h2>
+          <p class="mt-3 max-w-2xl text-dark-300">Browse tire models, sizes, and starting prices from our shop inventory.</p>
+        </div>
+        <a href="/tires" class="font-semibold text-primary-400 transition-colors hover:text-primary-300">View all tires <span aria-hidden="true">→</span></a>
+      </div>
+
+      {featuredTires.length > 0 ? (
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {featuredTires.map((model) => {
+            const brandName = typeof model.brand === 'object' ? model.brand?.name : model.brand;
+            const startingVariant = model.availableVariants[0];
+            return (
+              <a href={`/tires/${model.slug}`} class="group overflow-hidden rounded-2xl border border-dark-800 bg-dark-900 transition-all hover:-translate-y-1 hover:border-primary-500/50 hover:shadow-xl hover:shadow-black/20">
+                <div class="aspect-[4/3] overflow-hidden bg-white p-5">
+                  {model.image ? (
+                    <img src={getImageUrl(model.image)} alt={`${brandName || ''} ${model.name}`} loading="lazy" class="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105" />
+                  ) : (
+                    <div class="flex h-full items-center justify-center text-6xl text-dark-200" aria-hidden="true">◉</div>
+                  )}
+                </div>
+                <div class="p-5">
+                  <p class="mb-1 text-xs font-semibold uppercase tracking-wider text-primary-400">{brandName || 'WheelPower'}</p>
+                  <h3 class="text-lg font-bold text-white transition-colors group-hover:text-primary-300">{model.name}</h3>
+                  <p class="mt-2 text-sm text-dark-300">{model.availableVariants.length} available {model.availableVariants.length === 1 ? 'size' : 'sizes'} · starting at</p>
+                  <div class="mt-1 flex items-center justify-between gap-3">
+                    <span class="text-xl font-bold text-white">{formatPrice(model.fromPrice)}</span>
+                    <span class="text-sm font-semibold text-primary-400">Details →</span>
+                  </div>
+                  <p class="mt-3 border-t border-dark-800 pt-3 text-xs text-dark-400">Popular size: {startingVariant.size}</p>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      ) : (
+        <div class="rounded-2xl border border-dark-800 bg-dark-900 p-8 text-center">
+          <p class="text-dark-300">Check our full tire inventory or call us for current availability.</p>
+          <a href="/tires" class="btn-primary mt-5">Browse Tires</a>
+        </div>
+      )}
     </div>
   </section>
 
@@ -179,7 +240,7 @@ const whyChooseUs = [
         <p class="section-subtitle">Tire Brands</p>
         <h2 class="section-title">Premium Brands We Carry</h2>
         <p class="text-dark-400 mt-4 max-w-2xl mx-auto">
-          We partner with leading tire manufacturers to bring you quality options for every budget and need.
+          Explore tire brands and models currently available at WheelPower, with options for different vehicles and budgets.
         </p>
       </div>
       
@@ -239,25 +300,23 @@ const whyChooseUs = [
           </div>
         </div>
         
-        <!-- Right content - Image -->
+        <!-- Shop frontage -->
         <div class="relative">
-          <div class="aspect-square bg-gradient-to-br from-dark-800 to-dark-900 rounded-2xl border border-dark-700/50 flex items-center justify-center overflow-hidden">
-            {settings.site_logo ? (
-              <img 
-                src={getImageUrl(settings.site_logo)} 
-                alt={settings.business_name || 'WheelPower Auto Shop'}
-                class="w-2/3 h-2/3 object-contain"
-              />
+          <div class="relative aspect-[4/3] overflow-hidden rounded-2xl border border-dark-700/50 bg-dark-900 shadow-2xl shadow-black/20">
+            {settings.site_hero ? (
+              <img src={getImageUrl(settings.site_hero)} alt="WheelPower shop frontage on Marcos Highway" loading="lazy" class="h-full w-full object-cover object-[center_58%]" />
             ) : (
-              <div class="text-center p-8">
-                <div class="text-6xl mb-4">🏪</div>
-                <p class="text-dark-400">Shop Photo</p>
-                <p class="text-dark-500 text-sm">(Upload in admin panel)</p>
-              </div>
+              <div class="flex h-full items-center justify-center bg-gradient-to-br from-dark-800 to-dark-950 text-6xl" aria-hidden="true">🏪</div>
             )}
+            <div class="absolute inset-0 bg-gradient-to-t from-dark-950/90 via-transparent to-transparent"></div>
+            <div class="absolute inset-x-0 bottom-0 p-5 sm:p-7">
+              <p class="text-sm font-semibold uppercase tracking-wider text-primary-300">Find us on Marcos Highway</p>
+              <p class="mt-1 text-lg font-bold text-white">{settings.address || 'Paenaan, Baras, Rizal'}</p>
+              <a href={settings.google_maps_url || '/contact'} class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-white underline decoration-white/40 underline-offset-4 hover:text-primary-300">
+                Get directions <span aria-hidden="true">→</span>
+              </a>
+            </div>
           </div>
-          <!-- Decorative element -->
-          <div class="absolute -bottom-4 -right-4 w-24 h-24 bg-primary-500/20 rounded-full blur-2xl"></div>
         </div>
       </div>
     </div>

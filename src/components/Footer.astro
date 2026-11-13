@@ -33,20 +33,6 @@ const quickLinks = [
   { name: 'Book Appointment', href: '/book' },
 ];
 
-const partners = [
-  {
-    name: 'Valvoline',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Valvoline_company_logo.svg/3840px-Valvoline_company_logo.svg.png',
-  },
-  {
-    name: 'Würth',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/7/7e/W%C3%BCrth_logo.svg?utm_campaign=index&utm_content=original&utm_source=commons.wikimedia.org',
-  },
-  {
-    name: 'PowerUp',
-    logo: 'https://www.powerupoil.in/automotive-grease/images/1.png',
-  },
-];
 ---
 
 <footer class="bg-dark-950 border-t border-dark-800">
@@ -154,21 +140,9 @@ const partners = [
       </div>
     </div>
 
-    <!-- Partners and tire brand distribution -->
+    <!-- Tire brand distribution -->
     <div class="mt-12 border-t border-dark-800 pt-8">
-      <div class="text-center">
-        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-dark-500">Partners with</p>
-        <div class="mt-4 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-          {partners.map((partner) => (
-              <div class="flex h-20 min-w-40 items-center justify-center rounded-xl border border-dark-700 bg-white px-6 py-4 shadow-sm">
-                <img src={partner.logo} alt={`${partner.name} logo`} loading="lazy" class="max-h-12 max-w-36 object-contain" />
-                <span class="sr-only">{partner.name}</span>
-              </div>
-          ))}
-        </div>
-      </div>
-
-      <div class="mt-9 border-t border-dark-800 pt-8">
+      <div>
         <p class="text-center text-xs font-semibold uppercase tracking-[0.2em] text-primary-400">Official tire brand distributor</p>
         <div class="mt-4 flex flex-wrap justify-center gap-3">
         {tireBrands.map((brand) => (
